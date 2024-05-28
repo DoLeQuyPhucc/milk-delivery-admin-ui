@@ -1,12 +1,14 @@
 import {
   HomeIcon,
   UserCircleIcon,
-  TableCellsIcon,
-  InformationCircleIcon,
+  ShoppingCartIcon,
+  ExclamationCircleIcon,
+  Cog8ToothIcon,
   ServerStackIcon,
   RectangleStackIcon,
+  TruckIcon,
 } from "@heroicons/react/24/solid";
-import { Home, Profile, Tables, Notifications } from "@/pages/dashboard";
+import { Home, Profile, Tables, Notifications, UserManagement, OrderManagement, ShipperManagement } from "@/pages/dashboard";
 import { SignIn, SignUp } from "@/pages/auth";
 
 const icon = {
@@ -25,22 +27,40 @@ export const routes = [
       },
       {
         icon: <UserCircleIcon {...icon} />,
-        name: "profile",
-        path: "/profile",
+        name: "user management",
+        path: "/users",
+        element: <UserManagement />,
+      },
+      {
+        icon: <ShoppingCartIcon {...icon} />,
+        name: "order management",
+        path: "/orders",
+        element: <OrderManagement />,
+      },
+      {
+        icon: <TruckIcon {...icon} />,
+        name: "shipper management",
+        path: "/shipper",
+        element: <ShipperManagement />,
+      },
+      {
+        icon: <ExclamationCircleIcon {...icon} />,
+        name: "Reports & Analytics",
+        path: "/reports-analytics",
         element: <Profile />,
       },
       {
-        icon: <TableCellsIcon {...icon} />,
-        name: "tables",
-        path: "/tables",
+        icon: <Cog8ToothIcon {...icon} />,
+        name: "setting",
+        path: "/setting",
         element: <Tables />,
       },
-      {
-        icon: <InformationCircleIcon {...icon} />,
-        name: "notifications",
-        path: "/notifications",
-        element: <Notifications />,
-      },
+      // {
+      //   icon: <InformationCircleIcon {...icon} />,
+      //   name: "notifications",
+      //   path: "/notifications",
+      //   element: <Notifications />,
+      // },
     ],
   },
   {
