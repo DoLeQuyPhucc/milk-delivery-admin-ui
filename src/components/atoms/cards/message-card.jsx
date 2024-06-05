@@ -40,6 +40,6 @@ MessageCard.propTypes = {
   action: PropTypes.node,
 };
 
-MessageCard.displayName = "/src/widgets/cards/message-card.jsx";
+MessageCard.displayName = "/src/components/cards/message-card.jsx";
 
 export default MessageCard;
