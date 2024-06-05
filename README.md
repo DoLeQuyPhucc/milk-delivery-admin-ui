@@ -26,7 +26,12 @@ material-tailwind-dashboard-react
     │   ├── data
     │   ├── layouts
     │   ├── pages
-    │   ├── widgets
+    │   ├── hooks
+    │   ├── components
+    |       ├── atoms
+    |       ├── molecules
+    |       ├── organisms
+    |       ├── templates
     │   ├── App.jsx
     │   ├── main.jsx
     │   └── routes.jsx
