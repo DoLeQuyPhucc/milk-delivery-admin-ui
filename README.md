@@ -16,7 +16,6 @@ Quick start options:
 Within the download you'll find the following directories and files:
 
 ```
-material-tailwind-dashboard-react
     ├── public
     │   ├── css
     │   └── img
