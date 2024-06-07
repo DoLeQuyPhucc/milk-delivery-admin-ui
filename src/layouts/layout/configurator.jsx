@@ -152,6 +152,6 @@ export function Configurator() {
   );
 }
 
-Configurator.displayName = "/src/widgets/layout/configurator.jsx";
+Configurator.displayName = "/src/components/layout/configurator.jsx";
 
 export default Configurator;

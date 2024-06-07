@@ -1,4 +1,4 @@
-import {
+/*import {
   HomeIcon,
   UserCircleIcon,
   ShoppingCartIcon,
@@ -8,8 +8,8 @@ import {
   RectangleStackIcon,
   TruckIcon,
 } from "@heroicons/react/24/solid";
-import { Home, Profile, Tables, Notifications, UserManagement, OrderManagement, ShipperManagement } from "@/pages/dashboard";
-import { SignIn, SignUp } from "@/pages/auth";
+import { Home, Profile, Tables, Notifications, UserManagement, OrderManagement, ShipperManagement } from "@/components/pages/dashboard";
+import { SignIn, SignUp } from "@/components/pages/auth";
 
 const icon = {
   className: "w-5 h-5 text-inherit",
@@ -83,4 +83,4 @@ export const routes = [
   },
 ];
 
-export default routes;
+export default routes;*/

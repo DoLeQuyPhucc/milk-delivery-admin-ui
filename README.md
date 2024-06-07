@@ -16,7 +16,6 @@ Quick start options:
 Within the download you'll find the following directories and files:
 
 ```
-material-tailwind-dashboard-react
     ├── public
     │   ├── css
     │   └── img
@@ -25,8 +24,13 @@ material-tailwind-dashboard-react
     │   ├── context
     │   ├── data
     │   ├── layouts
-    │   ├── pages
-    │   ├── widgets
+    │   ├── hooks
+    │   ├── components
+    │       ├── atoms
+    │       ├── molecules
+    │       ├── organisms
+    │       ├── templates
+    │       ├── pages
     │   ├── App.jsx
     │   ├── main.jsx
     │   └── routes.jsx

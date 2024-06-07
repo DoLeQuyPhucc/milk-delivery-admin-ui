@@ -57,6 +57,6 @@ Footer.propTypes = {
   routes: PropTypes.arrayOf(PropTypes.object),
 };
 
-Footer.displayName = "/src/widgets/layout/footer.jsx";
+Footer.displayName = "/src/components/layout/footer.jsx";
 
 export default Footer;
