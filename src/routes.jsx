@@ -6,9 +6,10 @@
   Cog8ToothIcon,
   ServerStackIcon,
   RectangleStackIcon,
+  InformationCircleIcon,
   TruckIcon,
 } from "@heroicons/react/24/solid";
-import { Home, Profile, Tables, Notifications, UserManagement, OrderManagement, ShipperManagement } from "@/components/pages/dashboard";
+import { Home, Profile, Tables, Notifications, UserManagement, OrderManagement, ShipperManagement, Demo } from "@/components/pages/dashboard";
 import { SignIn, SignUp } from "@/components/pages/auth";
 
 const icon = {
@@ -55,12 +56,12 @@ export const routes = [
         path: "/setting",
         element: <Tables />,
       },
-      // {
-      //   icon: <InformationCircleIcon {...icon} />,
-      //   name: "notifications",
-      //   path: "/notifications",
-      //   element: <Notifications />,
-      // },
+      {
+        icon: <InformationCircleIcon {...icon} />,
+        name: "demo",
+        path: "/demo",
+        element: <Demo />,
+      },
     ],
   },
   {
@@ -79,6 +80,12 @@ export const routes = [
         path: "/sign-up",
         element: <SignUp />,
       },
+      {
+        icon: <RectangleStackIcon {...icon} />,
+        name: "demo",
+        path: "/demo",
+        element: <Demo />,
+      }
     ],
   },
 ];
