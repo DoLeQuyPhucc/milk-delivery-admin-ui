@@ -1,4 +1,4 @@
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useNavigate} from "react-router-dom";
 import {
   Navbar,
   Button,
@@ -34,6 +34,7 @@ export function DashboardNavbar() {
   const [layout, page] = pathname.split("/").filter((el) => el !== "");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     try {
@@ -49,6 +50,17 @@ export function DashboardNavbar() {
       console.error("Error retrieving user data:", error);
     }
   }, []);
+
+  const handleSignOut = () => {
+    try {
+      localStorage.removeItem("token");
+      localStorage.removeItem("firstName");
+      localStorage.removeItem("lastName");
+      navigate('/auth/sign-in');
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
 
   return (
     <Navbar
@@ -116,7 +128,7 @@ export function DashboardNavbar() {
                 <MenuList>
                   <MenuItem>Profile</MenuItem>
                   <MenuItem>Settings</MenuItem>
-                  <MenuItem>Sign Out</MenuItem>
+                  <MenuItem onClick={handleSignOut}>Sign Out</MenuItem>
                 </MenuList>
               </Menu>
             </div>

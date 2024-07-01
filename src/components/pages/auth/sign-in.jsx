@@ -8,19 +8,30 @@ import {
 } from "@material-tailwind/react";
 import { Link, useNavigate } from "react-router-dom";
 import { LogIn } from '@/data/UserAPI';
-import { toast } from 'react-toastify';import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import { toast } from 'react-toastify';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 
 export function SignIn() {
   const handleGoogleLoginSuccess = async (response) => {
     try {
       const res = await axios.post('http://localhost:8000/api/auth/google', { token: response.credential });
-      console.log(res.data);
+      console.log('Google Login Response:', res.data);
+      
+      if (res.data.error === 'duplicate_email') {
+        setError('Email already exists. Please use a different email or log in with your credentials.');
+        toast.warn('Email has been registered, please try different email')
+      } else {
+        navigate('/home');
+      }
     } catch (error) {
       console.error('Error during Google login:', error);
+      if (error.response) {
+        console.error('Response:', error.response.data);
+      }
     }
   };
-
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -138,7 +149,6 @@ export function SignIn() {
           <div className="space-y-4 mt-8">
             <GoogleOAuthProvider clientId="40702596662-b4e2ffmhvjlh104iolkedg8fef9qbddu.apps.googleusercontent.com">
               <div>
-                <h2>Sign In</h2>
                 <GoogleLogin
                   onSuccess={handleGoogleLoginSuccess}
                   onError={() => {

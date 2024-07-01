@@ -86,12 +86,6 @@ export const routes = [
         path: "/setting",
         element: <Profile />,
       },
-      {
-        icon: <InformationCircleIcon {...icon} />,
-        name: "demo",
-        path: "/demo",
-        element: <Demo />,
-      },
     ],
   },
   {
@@ -103,6 +97,7 @@ export const routes = [
         name: "sign in",
         path: "/sign-in",
         element: <SignIn />,
+        
       },
       {
         icon: <RectangleStackIcon {...icon} />,
