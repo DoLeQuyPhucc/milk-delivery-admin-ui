@@ -13,6 +13,7 @@
     "@headlessui/react": "^2.0.4",
     "@heroicons/react": "2.0.18",
     "@material-tailwind/react": "2.1.4",
+    "@react-oauth/google": "^0.12.1",
     "@reduxjs/toolkit": "^2.2.5",
     "antd": "^5.18.0",
     "apexcharts": "3.44.0",
