@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import {
   Card,
   Input,
@@ -5,10 +6,34 @@ import {
   Button,
   Typography,
 } from "@material-tailwind/react";
-import { Link } from "react-router-dom";
-
+import { Link, useNavigate } from "react-router-dom";
+import { LogIn } from '@/data/UserAPI';
+import { toast } from 'react-toastify';
 
 export function SignIn() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    try {
+      const data = await LogIn(email, password);
+      setUser(data.user);
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('firstName', data.user.firstName);
+      localStorage.setItem('lastName', data.user.lastName);
+      setError('');
+      navigate('/home');
+      toast.success("User has logged in successfully");
+      console.log("Token:", data.token)
+    } catch (err) {
+      setError(err.message);
+    }
+  };  
+
   return (
     <section className="m-8 flex gap-4">
       <div className="w-full lg:w-3/5 mt-24">
@@ -16,7 +41,7 @@ export function SignIn() {
           <Typography variant="h2" className="font-bold mb-4">Sign In</Typography>
           <Typography variant="paragraph" color="blue-gray" className="text-lg font-normal">Enter your email and password to Sign In.</Typography>
         </div>
-        <form className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2">
+        <form className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2" onSubmit={handleSubmit}>
           <div className="mb-1 flex flex-col gap-6">
             <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
               Your email
@@ -28,6 +53,9 @@ export function SignIn() {
               labelProps={{
                 className: "before:content-none after:content-none",
               }}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
             />
             <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
               Password
@@ -40,6 +68,9 @@ export function SignIn() {
               labelProps={{
                 className: "before:content-none after:content-none",
               }}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
           </div>
           <Checkbox
@@ -60,9 +91,20 @@ export function SignIn() {
             }
             containerProps={{ className: "-ml-2.5" }}
           />
-          <Button className="mt-6" fullWidth>
+          <Button className="mt-6" fullWidth type="submit">
             Sign In
           </Button>
+
+          {error && <p style={{ color: 'red' }}>{error}</p>}
+          {user && (
+            <div>
+              <h3>Welcome, {user.firstName} {user.lastName}</h3>
+              <p>Email: {user.email}</p>
+              <p>Phone: {user.phoneNumber}</p>
+              <p>Role: {user.role}</p>
+              <img src={user.avatarImage} alt="Avatar" />
+            </div>
+          )}
 
           <div className="flex items-center justify-between gap-2 mt-6">
             <Checkbox
@@ -99,10 +141,6 @@ export function SignIn() {
                 </defs>
               </svg>
               <span>Sign in With Google</span>
-            </Button>
-            <Button size="lg" color="white" className="flex items-center gap-2 justify-center shadow-md" fullWidth>
-              <img src="/img/twitter-logo.svg" height={24} width={24} alt="" />
-              <span>Sign in With Twitter</span>
             </Button>
           </div>
           <Typography variant="paragraph" className="text-center text-blue-gray-500 font-medium mt-4">

@@ -1,8 +1,8 @@
 import { useLocation, Link } from "react-router-dom";
 import {
   Navbar,
-  Typography,
   Button,
+  Typography,
   IconButton,
   Breadcrumbs,
   Input,
@@ -25,12 +25,30 @@ import {
   setOpenConfigurator,
   setOpenSidenav,
 } from "@/context";
+import { useEffect, useState } from "react";
 
 export function DashboardNavbar() {
   const [controller, dispatch] = useMaterialTailwindController();
   const { fixedNavbar, openSidenav } = controller;
   const { pathname } = useLocation();
   const [layout, page] = pathname.split("/").filter((el) => el !== "");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+
+  useEffect(() => {
+    try {
+      const storedFirstName = localStorage.getItem("firstName");
+      const storedLastName = localStorage.getItem("lastName");
+      console.log('First Name:', storedFirstName);
+      console.log('Last Name:', storedLastName);
+      if (storedFirstName && storedLastName) {
+        setFirstName(storedFirstName);
+        setLastName(storedLastName);
+      }
+    } catch (error) {
+      console.error("Error retrieving user data:", error);
+    }
+  }, []);
 
   return (
     <Navbar
@@ -83,23 +101,26 @@ export function DashboardNavbar() {
           >
             <Bars3Icon strokeWidth={3} className="h-6 w-6 text-blue-gray-500" />
           </IconButton>
-          <Link to="/auth/sign-in">
-            <Button
-              variant="text"
-              color="blue-gray"
-              className="hidden items-center gap-1 px-4 xl:flex normal-case"
-            >
-              <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
-              Sign In
-            </Button>
-            <IconButton
-              variant="text"
-              color="blue-gray"
-              className="grid xl:hidden"
-            >
-              <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
-            </IconButton>
-          </Link>
+          {firstName && lastName && (
+            <div className="flex items-center gap-1">
+              <Menu>
+                <MenuHandler>
+                  <Button
+                    variant="text"
+                    color="blue-gray"
+                    className="hidden md:flex items-center gap-1 normal-case"
+                  >
+                    {firstName} {lastName}
+                  </Button>
+                </MenuHandler>
+                <MenuList>
+                  <MenuItem>Profile</MenuItem>
+                  <MenuItem>Settings</MenuItem>
+                  <MenuItem>Sign Out</MenuItem>
+                </MenuList>
+              </Menu>
+            </div>
+          )}
           <Menu>
             <MenuHandler>
               <IconButton variant="text" color="blue-gray">

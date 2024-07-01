@@ -1,55 +1,54 @@
 import React, { useState, useEffect } from 'react';
-import { getAllUsers } from '@/data/UserAPI';
+import { getAllProducts } from '@/data/ProductAPI';
 import {
   Card,
   CardHeader,
   CardBody,
   Typography,
   Avatar,
+  Chip,
   Button,
 } from '@material-tailwind/react';
-import CreateUserForm from '@/components/organisms/CreateModal/CreateUserForm';
+import CreateProductForm from '@/components/organisms/CreateModal/CreateProductForm';
 import Modal from '@/components/organisms/Modal';
 
-
-
-export function UserManagement() {
-  const [users, setUsers] = useState([]);
+export function ProductManagement() {
+  const [products, setProducts] = useState([]);
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchProducts = async () => {
       try {
-        const users = await getAllUsers();
-        setUsers(users);
+        const products = await getAllProducts();
+        setProducts(products);
       } catch (error) {
         setError(error);
       }
     };
 
-    fetchUsers();
+    fetchProducts();
   }, []);
 
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
       {error ? (
-        <div>Error fetching users: {error.message}</div>
+        <div>Error fetching products: {error.message}</div>
       ) : (
         <Card>
           <CardHeader variant="gradient" color="gray" className="mb-8 p-6 flex justify-between items-center">
             <Typography variant="h6" color="white">
-              Users Table
+              Products Table
             </Typography>
             <td className="font-semibold">
-              <Button onClick={() => setIsModalOpen(true)}>Create User</Button>
+              <Button onClick={() => setIsModalOpen(true)}>Create Product</Button>
             </td>
           </CardHeader>
           <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
             <table className="w-full min-w-[640px] table-auto">
               <thead>
                 <tr>
-                  {['ID', 'Email', 'Role', 'Last Name', 'First Name','Action'].map((el) => (
+                  {['Name', 'Image', 'Description', 'Price', 'Stock Quantity', 'Action'].map((el) => (
                     <th
                       key={el}
                       className="border-b border-blue-gray-50 py-3 px-5 text-left"
@@ -61,40 +60,36 @@ export function UserManagement() {
                         {el}
                       </Typography>
                     </th>
-
                   ))}
                 </tr>
-
               </thead>
               <tbody>
-                {users.map((user, key) => {
-                  const className = `py-3 px-5 ${key === users.length - 1 ? '' : 'border-b border-blue-gray-50'}`;
+                {products.map((product, key) => {
+                  const className = `py-3 px-5 ${key === products.length - 1 ? '' : 'border-b border-blue-gray-50'}`;
 
                   return (
-                    <tr key={user._id}>
+                    <tr key={product.name}>
                       <td className={className}>
                         <Typography variant="small" color="blue-gray" className="font-semibold">
-                          {user.userID}
+                          {product.name}
+                        </Typography>
+                      </td>
+                      <td className={className}>
+                        <Avatar src={product.productImage} alt={product.name} size="sm" variant="rounded" />
+                      </td>
+                      <td className={className}>
+                        <Typography className="text-xs font-normal text-blue-gray-500">
+                          {product.description}
                         </Typography>
                       </td>
                       <td className={className}>
                         <Typography className="text-xs font-normal text-blue-gray-500">
-                          {user.email}
+                          {product.price.toLocaleString()} VND
                         </Typography>
                       </td>
                       <td className={className}>
                         <Typography className="text-xs font-normal text-blue-gray-500">
-                          {user.role}
-                        </Typography>
-                      </td>
-                      <td className={className}>
-                        <Typography className="text-xs font-normal text-blue-gray-500">
-                          {user.lastName}
-                        </Typography>
-                      </td>
-                      <td className={className}>
-                        <Typography className="text-xs font-normal text-blue-gray-500">
-                          {user.firstName}
+                          {product.stockQuantity}
                         </Typography>
                       </td>
                       <td className={className}>
@@ -111,16 +106,14 @@ export function UserManagement() {
                 })}
               </tbody>
             </table>
-
           </CardBody>
         </Card>
-
       )}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <CreateUserForm />
+        <CreateProductForm />
       </Modal>
     </div>
   );
 }
 
-export default UserManagement;
+export default ProductManagement;
