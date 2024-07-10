@@ -44,8 +44,6 @@ export function SignIn() {
       const data = await LogIn(email, password);
       setUser(data.user);
       localStorage.setItem('token', data.token);
-      localStorage.setItem('firstName', data.user.firstName);
-      localStorage.setItem('lastName', data.user.lastName);
       setError('');
       navigate('/home');
       toast.success("User has logged in successfully");

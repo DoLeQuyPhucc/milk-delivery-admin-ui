@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { getBrandById, updateBrand } from '@/data/BrandAPI';
 
-function EditBrandForm({ brandId }) {
+function EditBrandModal({ brandId }) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -143,8 +143,8 @@ function EditBrandForm({ brandId }) {
   );
 }
 
-EditBrandForm.propTypes = {
+EditBrandModal.propTypes = {
   brandId: PropTypes.string.isRequired, // Ensure brandId is a required string prop
 };
 
-export default EditBrandForm;
+export default EditBrandModal;

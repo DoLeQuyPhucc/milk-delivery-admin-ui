@@ -1,0 +1,24 @@
+/* OrderCalendar.css */
+.details-button {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 0px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    
+  }
+  
+  .fc-daygrid-day {
+    position: relative;
+  }
+  
+  .fc-daygrid-day .fc-daygrid-day-number {
+    margin-bottom: 10px; 
+  }
+  

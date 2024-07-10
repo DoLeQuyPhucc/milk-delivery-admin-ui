@@ -1,59 +1,64 @@
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import { createProduct } from '@/data/ProductAPI';
-import { getAllBrands } from '@/data/BrandAPI';
+import { getProductById, updateProductById } from '@/data/ProductAPI'; // Adjust the import path as needed
+import { getAllBrands } from '@/data/BrandAPI'; // Adjust the import path as needed
 
-function CreateProductForm({ onClose }) {
+function EditProductModal({ productId, onClose }) {
   const [formData, setFormData] = useState({
-    brandID: '',
+    brandID: '', // Changed from 'brandID' to match the state property
     name: '',
     productImage: '',
     description: '',
     price: 0,
     stockQuantity: 0,
   });
-
-  const [existingBrands, setExistingBrands] = useState([]);
-  const [products, setProducts] = useState([]);
+  const [brands, setBrands] = useState([]);
 
   useEffect(() => {
-    const fetchBrands = async () => {
+    const fetchData = async () => {
       try {
-        const brands = await getAllBrands();
-        setExistingBrands(brands);
+        const [product, brands] = await Promise.all([getProductById(productId), getAllBrands()]);
+        setFormData({
+          brandID: product.brandID._id, // Store brand ID to match with dropdown values
+          name: product.name,
+          productImage: product.productImage,
+          description: product.description,
+          price: product.price,
+          stockQuantity: product.stockQuantity,
+        });
+        setBrands(brands);
       } catch (error) {
-        console.error('Failed to fetch brands:', error);
+        console.error('Failed to fetch data:', error);
       }
     };
 
-    fetchBrands();
-  }, []);
+    if (productId) {
+      fetchData();
+    }
+  }, [productId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData({ ...formData, [name]: value }); // Update formData with the selected value
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const newProduct = await createProduct(formData);
-      console.log('Product created:', newProduct);
-      alert('Product created successfully!');
-      setProducts([...products, newProduct]);
-      onClose();
-      window.location.reload(); // Refreshing the page can be replaced with more targeted state updates if desired
+      await updateProductById(productId, formData);
+      console.log('Product updated:', formData);
+      alert('Product updated successfully!');
+      window.location.reload();
     } catch (error) {
-      console.error('Failed to create product:', error);
-      alert('Error creating product. Please try again.');
+      console.error('Failed to update product:', error);
+      alert('Error updating product. Please try again.');
     }
   };
 
   return (
     <div className="border-b border-gray-900/10 pb-12">
-      <h2 className="text-base font-semibold leading-7 text-gray-900">Product Information</h2>
-      <p className="mt-1 text-sm leading-6 text-gray-600">Enter the product details below.</p>
+      <h2 className="text-base font-semibold leading-7 text-gray-900">Edit Product Information</h2>
+      <p className="mt-1 text-sm leading-6 text-gray-600">Update the product details below.</p>
 
       <form onSubmit={handleSubmit}>
         <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
@@ -63,15 +68,14 @@ function CreateProductForm({ onClose }) {
             </label>
             <div className="mt-2">
               <select
+                name="brandID" // Changed from 'brand' to match the state property
                 id="brandID"
-                name="brandID"
                 value={formData.brandID}
                 onChange={handleChange}
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50 sm:text-sm"
+                className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 required
               >
-                <option value="">Select a brand...</option>
-                {existingBrands.map((brand) => (
+                {brands.map((brand) => (
                   <option key={brand._id} value={brand._id}>
                     {brand.name}
                   </option>
@@ -89,24 +93,26 @@ function CreateProductForm({ onClose }) {
                 type="text"
                 name="name"
                 id="name"
-                className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                value={formData.name}
                 onChange={handleChange}
+                className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 required
               />
             </div>
           </div>
 
-          <div className="sm:col-span-3">
+          <div className="sm:col-span-6">
             <label htmlFor="productImage" className="block text-sm font-medium leading-6 text-gray-900">
               Product Image URL
             </label>
             <div className="mt-2">
-              <input
+              <textarea
                 type="url"
                 name="productImage"
                 id="productImage"
-                className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                value={formData.productImage}
                 onChange={handleChange}
+                className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 required
               />
             </div>
@@ -120,8 +126,9 @@ function CreateProductForm({ onClose }) {
               <textarea
                 name="description"
                 id="description"
-                className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                value={formData.description}
                 onChange={handleChange}
+                className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 required
               ></textarea>
             </div>
@@ -136,8 +143,9 @@ function CreateProductForm({ onClose }) {
                 type="number"
                 name="price"
                 id="price"
-                className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                value={formData.price}
                 onChange={handleChange}
+                className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 required
               />
             </div>
@@ -152,8 +160,9 @@ function CreateProductForm({ onClose }) {
                 type="number"
                 name="stockQuantity"
                 id="stockQuantity"
-                className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                value={formData.stockQuantity}
                 onChange={handleChange}
+                className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 required
               />
             </div>
@@ -165,7 +174,7 @@ function CreateProductForm({ onClose }) {
             type="submit"
             className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
-            Create Product
+            Update Product
           </button>
         </div>
       </form>
@@ -173,8 +182,4 @@ function CreateProductForm({ onClose }) {
   );
 }
 
-CreateProductForm.propTypes = {
-  onClose: PropTypes.func.isRequired,
-};
-
-export default CreateProductForm;
+export default EditProductModal;

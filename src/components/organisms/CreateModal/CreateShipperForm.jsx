@@ -1,14 +1,34 @@
 import { createShipper } from '@/data/ShipperAPI';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { getAllStores } from '@/data/StoreAPI';
 
 function CreateShipperForm() {
   const [formData, setFormData] = useState({
     shipperName: '',
     phone: '',
-    storeID: '',
+    storeID: ''
   });
 
-  const [shippers, setShippers] = useState([]);
+  const [stores, setStores] = useState([]);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchStores = async () => {
+      try {
+        const response = await getAllStores();
+        if (response && Array.isArray(response)) {
+          setStores(response);
+        } else {
+          console.error('Empty response or missing data:', response);
+        }
+      } catch (error) {
+        console.error('Error fetching stores:', error);
+        setError('Failed to fetch stores.');
+      }
+    };
+
+    fetchStores();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -23,18 +43,23 @@ function CreateShipperForm() {
         shipperName: formData.shipperName,
         phone: formData.phone,
         store: {
-          storeID: formData.storeID,
-        },
+          storeID: formData.storeID
+        }
       });
       console.log('Shipper created:', newShipper);
       alert('Shipper created successfully!');
-      setShippers([...shippers, newShipper]);
+      // Handle state update for newly created shipper if needed
+      // setShippers([...shippers, newShipper]);
       window.location.reload();
     } catch (error) {
       console.error('Failed to create shipper:', error);
       alert('Error creating shipper. Please try again.');
     }
   };
+
+  if (error) {
+    return <div>{error}</div>;
+  }
 
   return (
     <div className="border-b border-gray-900/10 pb-12">
@@ -77,20 +102,23 @@ function CreateShipperForm() {
             </div>
           </div>
 
-          <div className="col-span-full">
+          <div className="sm:col-span-2">
             <label htmlFor="storeID" className="block text-sm font-medium leading-6 text-gray-900">
-              Store ID
+              Store
             </label>
             <div className="mt-2">
-              <input
-                type="text"
-                name="storeID"
+              <select
                 id="storeID"
-                autoComplete="store-id"
+                name="storeID"
                 className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 onChange={handleChange}
                 required
-              />
+              >
+                <option value="">Select a store</option>
+                {stores.map(store => (
+                  <option key={store._id} value={store._id}>{store.storeName}</option>
+                ))}
+              </select>
             </div>
           </div>
         </div>

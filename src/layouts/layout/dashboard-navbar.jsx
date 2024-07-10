@@ -113,7 +113,7 @@ export function DashboardNavbar() {
           >
             <Bars3Icon strokeWidth={3} className="h-6 w-6 text-blue-gray-500" />
           </IconButton>
-          {firstName && lastName && (
+         
             <div className="flex items-center gap-1">
               <Menu>
                 <MenuHandler>
@@ -122,7 +122,7 @@ export function DashboardNavbar() {
                     color="blue-gray"
                     className="hidden md:flex items-center gap-1 normal-case"
                   >
-                    {firstName} {lastName}
+                    Manage
                   </Button>
                 </MenuHandler>
                 <MenuList>
@@ -132,7 +132,7 @@ export function DashboardNavbar() {
                 </MenuList>
               </Menu>
             </div>
-          )}
+          
           <Menu>
             <MenuHandler>
               <IconButton variant="text" color="blue-gray">

@@ -9,7 +9,8 @@ import {
 import { getAllBrands, deleteBrand } from '@/data/BrandAPI';
 import Modal from '@/components/organisms/Modal';
 import CreateBrandForm from '@/components/organisms/CreateModal/CreateBrandForm';
-import EditBrandForm from '@/components/organisms/EditModal/EditBrandForm';
+import EditBrandModal from '@/components/organisms/EditModal/EditBrandModal';
+
 
 function BrandManagement() {
   const [brands, setBrands] = useState([]);
@@ -143,7 +144,7 @@ function BrandManagement() {
       </Card>
       <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
         {editingBrand ? (
-          <EditBrandForm
+          <EditBrandModal
             brandId={editingBrand._id}
             onCloseModal={handleCloseModal}
           />

@@ -1,15 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPackage } from '@/data/PackageAPI';
-import { Input } from '@material-tailwind/react';
+import { getAllProducts } from '@/data/ProductAPI';
+import { getAllBrands } from '@/data/BrandAPI';
 
 function CreatePackageForm() {
+    const [brands, setBrands] = useState([]);
+    const [selectedBrandID, setSelectedBrandID] = useState('');
+    const [allProducts, setAllProducts] = useState([]);
+    const [filteredProducts, setFilteredProducts] = useState([]);
     const [formData, setFormData] = useState({
-        products: [
-            { product: { name: '', brandID: '', productImage: '', description: '', price: '', stockQuantity: '' }, quantity: '' }
-        ],
+        products: [],
         totalAmount: 0,
         totalPrice: 0
     });
+
+    useEffect(() => {
+        // Fetch available brands and all products
+        const fetchData = async () => {
+            try {
+                const brandsData = await getAllBrands();
+                setBrands(brandsData);
+
+                const productsData = await getAllProducts();
+                setAllProducts(productsData);
+            } catch (error) {
+                console.error('Failed to fetch data:', error);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    useEffect(() => {
+        // Filter products based on selected brand ID
+        if (selectedBrandID) {
+            const filtered = allProducts.filter(product => product.brandID === selectedBrandID);
+            setFilteredProducts(filtered);
+        } else {
+            setFilteredProducts([]);
+        }
+    }, [selectedBrandID, allProducts]);
 
     const calculateTotals = (products) => {
         let totalAmount = 0;
@@ -58,10 +88,10 @@ function CreatePackageForm() {
         setFormData({ ...formData, products: updatedProducts, totalAmount, totalPrice });
     };
 
-    const handleAddProduct = () => {
+    const handleAddProduct = (product) => {
         const updatedProducts = [
             ...formData.products,
-            { product: { name: '', brandID: '', productImage: '', description: '', price: '', stockQuantity: '' }, quantity: '' }
+            { product, quantity: '' }
         ];
         const { totalAmount, totalPrice } = calculateTotals(updatedProducts);
         setFormData({ ...formData, products: updatedProducts, totalAmount, totalPrice });
@@ -91,149 +121,124 @@ function CreatePackageForm() {
             <h2 className="text-base font-semibold leading-7 text-gray-900">Create New Package</h2>
 
             <form onSubmit={handleSubmit}>
-                {formData.products.map((product, index) => (
-                    <div key={index} className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                        <div className="sm:col-span-6">
-                            <label htmlFor={`product-name-${index}`} className="block text-sm font-medium leading-6 text-gray-900">
-                                Product Name
-                            </label>
-                            <div className="mt-2">
-                                <input
-                                    type="text"
-                                    name="productName"
-                                    id={`product-name-${index}`}
-                                    className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                                    value={product.product.name}
-                                    onChange={(e) => handleChange(e, index, 'name')}
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div className="sm:col-span-6">
-                            <label htmlFor={`product-brandID-${index}`} className="block text-sm font-medium leading-6 text-gray-900">
-                                Brand ID
-                            </label>
-                            <div className="mt-2">
-                                <input
-                                    type="text"
-                                    name="productBrandID"
-                                    id={`product-brandID-${index}`}
-                                    className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                                    value={product.product.brandID}
-                                    onChange={(e) => handleChange(e, index, 'brandID')}
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div className="sm:col-span-6">
-                            <label htmlFor={`product-image-${index}`} className="block text-sm font-medium leading-6 text-gray-900">
-                                Product Image URL
-                            </label>
-                            <div className="mt-2">
-                                <input
-                                    type="url"
-                                    name="productImage"
-                                    id={`product-image-${index}`}
-                                    className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                                    value={product.product.productImage}
-                                    onChange={(e) => handleChange(e, index, 'productImage')}
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div className="sm:col-span-6">
-                            <label htmlFor={`product-description-${index}`} className="block text-sm font-medium leading-6 text-gray-900">
-                                Product Description
-                            </label>
-                            <div className="mt-2">
-                                <input
-                                    type="text"
-                                    name="productDescription"
-                                    id={`product-description-${index}`}
-                                    className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                                    value={product.product.description}
-                                    onChange={(e) => handleChange(e, index, 'description')}
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div className="sm:col-span-2">
-                            <label htmlFor={`product-price-${index}`} className="block text-sm font-medium leading-6 text-gray-900">
-                                Product Price
-                            </label>
-                            <div className="mt-2">
-                                <input
-                                    type="number"
-                                    name="productPrice"
-                                    id={`product-price-${index}`}
-                                    className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                                    value={product.product.price}
-                                    onChange={(e) => handleChange(e, index, 'price')}
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div className="sm:col-span-2">
-                            <label htmlFor={`product-stockQuantity-${index}`} className="block text-sm font-medium leading-6 text-gray-900">
-                                Stock Quantity
-                            </label>
-                            <div className="mt-2">
-                                <input
-                                    type="number"
-                                    name="productStockQuantity"
-                                    id={`product-stockQuantity-${index}`}
-                                    className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                                    value={product.product.stockQuantity}
-                                    onChange={(e) => handleChange(e, index, 'stockQuantity')}
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div className="sm:col-span-2">
-                            <label htmlFor={`quantity-${index}`} className="block text-sm font-medium leading-6 text-gray-900">
-                                Quantity
-                            </label>
-                            <div className="mt-2">
-                                <input
-                                    type="number"
-                                    name="quantity"
-                                    id={`quantity-${index}`}
-                                    className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                                    value={product.quantity}
-                                    onChange={(e) => handleChange(e, index)}
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div className="sm:col-span-6">
-                            <button
-                                type="button"
-                                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-500 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                                onClick={() => handleRemoveProduct(index)}
-                            >
-                                Remove Product
-                            </button>
-                        </div>
-                    </div>
-                ))}
-
                 <div className="sm:col-span-6">
-                    <button
-                        type="button"
-                        className="mt-5 mb-5 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-400 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                        onClick={handleAddProduct}
-                    >
-                        Add Another Product
-                    </button>
+                    <label htmlFor="brand" className="block text-sm font-medium leading-6 text-gray-900">
+                        Select Brand
+                    </label>
+                    <div className="mt-2">
+                        <select
+                            id="brand"
+                            name="brand"
+                            className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                            value={selectedBrandID}
+                            onChange={(e) => setSelectedBrandID(e.target.value)}
+                            required
+                        >
+                            <option value="">Select a brand</option>
+                            {brands.map((brand) => (
+                                <option key={brand._id} value={brand._id}>
+                                    {brand.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
-                <div className="flex justify-between items-center sm:col-span-6">
+
+                {selectedBrandID && (
+                    <div className="sm:col-span-6 mt-6">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr>
+                                    <th scope="col" className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Select
+                                    </th>
+                                    <th scope="col" className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Product 
+                                    </th>
+                                    <th scope="col" className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Price
+                                    </th>
+                                    
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {filteredProducts.map((product) => (
+                                    <tr key={product._id}>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <input
+                                                type="checkbox"
+                                                onChange={() => handleAddProduct(product)}
+                                            />
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            {product.name}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            {product.price} VND
+                                        </td>
+                                        
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+
+                <div className="sm:col-span-6 mt-6">
+                    <h3 className="text-base font-semibold leading-7 text-gray-900">Selected Products</h3>
+                    <div className="mt-2">
+                        {formData.products.length > 0 ? (
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Product
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Quantity
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Actions
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {formData.products.map((product, index) => (
+                                        <tr key={product.product.id}>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                {product.product.name}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <input
+                                                    type="number"
+                                                    name="quantity"
+                                                    className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                                    value={product.quantity}
+                                                    onChange={(e) => handleChange(e, index)}
+                                                    required
+                                                    min={1}
+                                                />
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <button
+                                                    type="button"
+                                                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-500 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                                    onClick={() => handleRemoveProduct(index)}
+                                                >
+                                                    Delete
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        ) : (
+                            <p className="text-sm text-gray-500">No products added yet.</p>
+                        )}
+                    </div>
+                </div>
+
+                <div className="flex justify-between items-center sm:col-span-6 mt-6">
                     <div className="sm:col-span-6">
                         <label htmlFor="totalAmount" className="block text-sm font-medium leading-6 text-gray-900">
                             Total Amount
@@ -270,7 +275,7 @@ function CreatePackageForm() {
                 <div className="mt-6">
                     <button
                         type="submit"
-                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-500 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-500 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                     >
                         Create Package
                     </button>

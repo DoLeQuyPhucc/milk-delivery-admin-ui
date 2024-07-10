@@ -69,7 +69,7 @@ function PackageManagement() {
           <table className="w-full min-w-[640px] table-auto">
             <thead>
               <tr>
-                {['Package ID', 'Product Image', 'Product Name', 'Description', 'Quantity', 'Actions'].map((el) => (
+                {['Package ID', 'Product Image', 'Product Name', 'Quantity', 'Actions'].map((el) => (
                   <th
                     key={el}
                     className="border-b border-blue-gray-50 py-3 px-5 text-left"
@@ -113,13 +113,6 @@ function PackageManagement() {
                           </Typography>
                         </td>
                         <td className={className}>
-                          <Typography variant="small" color="blue-gray" className="mr-2" style={{ maxWidth: '100%', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
-                            <span style={{ marginRight: '2px' }}>
-                              {product.product.description}
-                            </span>
-                          </Typography>
-                        </td>
-                        <td className={className}>
                           <Typography variant="small" color="blue-gray" className="font-semibold">
                             {product.quantity}
                           </Typography>
@@ -148,9 +141,11 @@ function PackageManagement() {
       <Modal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)}>
         <CreatePackageForm />
       </Modal>
-      <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)}>
-        <EditPackageModal packageId={selectedPackageId} onClose={() => setIsEditModalOpen(false)} />
-      </Modal>
+      {isEditModalOpen && selectedPackageId && (
+        <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)}>
+          <EditPackageModal packageId={selectedPackageId} onClose={() => setIsEditModalOpen(false)} />
+        </Modal>
+      )}
     </div>
   );
 }

@@ -39,7 +39,7 @@ export const updateStore = async (storeId, storeData) => {
     const token = localStorage.getItem('token');
     const response = await axios.put(`https://milk-delivery-api.onrender.com/api/stores/${storeId}`, storeData, {
       headers: {
-        'Authorization': `Bearer ${token}`,
+        'Authorization': `${token}`,
         'Content-Type': 'application/json'
       }
     });
@@ -71,7 +71,7 @@ export async function updateStoreById(storeId, storeData) {
   try {
       const response = await axios.put(url, storeData,{
           headers: {
-              'Authorization': `Bearer ${token}`
+              'Authorization': ` Bearer ${token}`
           }
       });
       return response.data;

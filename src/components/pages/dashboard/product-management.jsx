@@ -1,21 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { getAllProducts } from '@/data/ProductAPI';
+import { getAllProducts, deleteProductById } from '@/data/ProductAPI';
 import {
   Card,
   CardHeader,
   CardBody,
   Typography,
   Avatar,
-  Chip,
   Button,
 } from '@material-tailwind/react';
 import CreateProductForm from '@/components/organisms/CreateModal/CreateProductForm';
+import EditProductModal from '@/components/organisms/EditModal/EditProductModal'; // Adjust the import path
 import Modal from '@/components/organisms/Modal';
 
 export function ProductManagement() {
   const [products, setProducts] = useState([]);
   const [error, setError] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -30,6 +32,25 @@ export function ProductManagement() {
     fetchProducts();
   }, []);
 
+  const handleEditClick = (productId) => {
+    setSelectedProductId(productId);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDeleteClick = async (productId) => {
+    const confirmDelete = window.confirm('Are you sure you want to delete this product?');
+    if (confirmDelete) {
+      try {
+        await deleteProductById(productId);
+        setProducts(products.filter((product) => product._id !== productId));
+        alert('Product deleted successfully');
+      } catch (error) {
+        console.error('Failed to delete product:', error);
+        alert('Error deleting product. Please try again.');
+      }
+    }
+  };
+
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
       {error ? (
@@ -40,9 +61,7 @@ export function ProductManagement() {
             <Typography variant="h6" color="white">
               Products Table
             </Typography>
-            <td className="font-semibold">
-              <Button onClick={() => setIsModalOpen(true)}>Create Product</Button>
-            </td>
+            <Button onClick={() => setIsCreateModalOpen(true)}>Create Product</Button>
           </CardHeader>
           <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
             <table className="w-full min-w-[640px] table-auto">
@@ -68,7 +87,7 @@ export function ProductManagement() {
                   const className = `py-3 px-5 ${key === products.length - 1 ? '' : 'border-b border-blue-gray-50'}`;
 
                   return (
-                    <tr key={product.name}>
+                    <tr key={product._id}>
                       <td className={className}>
                         <Typography variant="small" color="blue-gray" className="font-semibold">
                           {product.name}
@@ -93,14 +112,25 @@ export function ProductManagement() {
                         </Typography>
                       </td>
                       <td className={className}>
-                          <Typography
-                            as="a"
-                            href="#"
-                            className="text-xs font-semibold text-blue-gray-600"
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="text"
+                            size="small"
+                            className="text-xs font-semibold text-white bg-indigo-500 hover:bg-indigo-700"
+                            onClick={() => handleEditClick(product._id)}
                           >
                             Edit
-                          </Typography>
-                        </td>
+                          </Button>
+                          <Button
+                            variant="text"
+                            size="small"
+                            className="text-xs font-semibold text-white bg-red-500 hover:bg-red-700"
+                            onClick={() => handleDeleteClick(product._id)}
+                          >
+                            Delete
+                          </Button>
+                        </div>
+                      </td>
                     </tr>
                   );
                 })}
@@ -109,8 +139,11 @@ export function ProductManagement() {
           </CardBody>
         </Card>
       )}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <CreateProductForm />
+      <Modal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)}>
+        <CreateProductForm onClose={() => setIsEditModalOpen(false)}/>
+      </Modal>
+      <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)}>
+        <EditProductModal productId={selectedProductId} onClose={() => setIsEditModalOpen(false)} />
       </Modal>
     </div>
   );

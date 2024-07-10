@@ -1,6 +1,8 @@
+import React from 'react';
 import { CloseOutlined } from "@ant-design/icons";
+import PropTypes from 'prop-types';
 
-export default function Modal({ isOpen, children, onClose }) {
+function Modal({ isOpen, children, onClose }) {
   if (!isOpen) {
     return null;
   }
@@ -31,3 +33,11 @@ export default function Modal({ isOpen, children, onClose }) {
     </div>
   );
 }
+
+Modal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  children: PropTypes.node.isRequired,
+};
+
+export default Modal;

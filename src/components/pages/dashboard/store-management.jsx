@@ -8,8 +8,8 @@ import {
 } from '@material-tailwind/react';
 import { getAllStores, deleteStoreById } from '@/data/StoreAPI';
 import CreateStoreForm from '@/components/organisms/CreateModal/CreateStoreForm';
-import EditStoreForm from '@/components/organisms/EditModal/EditStoreModal';
 import Modal from '@/components/organisms/Modal';
+import EditStoreModal from '@/components/organisms/EditModal/EditStoreModal';
 
 function StoreManagement() {
   const [stores, setStores] = useState([]);
@@ -140,7 +140,7 @@ function StoreManagement() {
       </Card>
       <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
         {editStoreId ? (
-          <EditStoreForm storeId={editStoreId} onClose={handleCloseModal} />
+          <EditStoreModal storeId={editStoreId} onClose={handleCloseModal} />
         ) : (
           <CreateStoreForm />
         )}

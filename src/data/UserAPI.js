@@ -38,15 +38,8 @@ export const LogIn = async (email, password) => {
 
   const data = await response.json();
   return {
-    user: {
-      firstName: data.firstName,
-      lastName: data.lastName,
-      email: data.email,
-      phoneNumber: data.phoneNumber,
-      role: data.role,
-      avatarImage: data.avatarImage,
-    },
-    token: data.token,
+    token: data.accessToken,
+    refreshToken: data.refreshToken
   };
 };
 export const createUser = async (userData) => {
@@ -65,7 +58,69 @@ export const createUser = async (userData) => {
     throw error;
   }
 };
+export const getUserById = async (userId) => {
+  const token = localStorage.getItem('token');
+  try {
+    const url = `https://milk-delivery-api.onrender.com/api/users/getUserById/${userId}`;
+    const response = await axios.get(url, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    // Check if the response is OK
+    if (response.status === 200) {
+      return response.data;
+    } else {
+      throw new Error('Failed to fetch user information');
+    }
+  } catch (error) {
+    console.error('Error fetching user information:', error);
+    throw error;
+  }
+};
+export const updateUserById = async (userId, userData) => {
+  const token = localStorage.getItem('token');
+  try {
+    const url = `https://milk-delivery-api.onrender.com/api/users/${userId}`;
+    const response = await axios.put(url, userData, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
 
+    // Check if the response is OK
+    if (response.status === 200) {
+      return response.data;
+    } else {
+      throw new Error('Failed to update user information');
+    }
+  } catch (error) {
+    console.error('Error updating user information:', error);
+    throw error;
+  }
+};
+export const deleteUserById = async (userId) => {
+  const token = localStorage.getItem('token');
+  try {
+    const url = `https://milk-delivery-api.onrender.com/api/users/getUserById/${userId}`;
+    const response = await axios.delete(url, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    // Check if the response is OK
+    if (response.status === 200) {
+      return response.data;
+    } else {
+      throw new Error('Failed to update user information');
+    }
+  } catch (error) {
+    console.error('Error updating user information:', error);
+    throw error;
+  }
+};
 
 
 

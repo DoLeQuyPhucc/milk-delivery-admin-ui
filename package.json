@@ -10,6 +10,10 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.3.7",
+    "@fullcalendar/core": "^6.1.14",
+    "@fullcalendar/daygrid": "^6.1.14",
+    "@fullcalendar/interaction": "^6.1.14",
+    "@fullcalendar/timegrid": "^6.1.14",
     "@headlessui/react": "^2.0.4",
     "@heroicons/react": "2.0.18",
     "@material-tailwind/react": "2.1.4",

@@ -1,47 +1,71 @@
-import React, { useEffect, useState } from 'react';
-import { getShipperById, updateShipperById } from '@/data/ShipperAPI';
-import PropTypes from 'prop-types';
+// EditShipperModal.js
 
-function EditShipperForm({ shipperId, onClose }) {
+import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
+import { getShipperById, updateShipperById } from '@/data/ShipperAPI';
+import { getAllStores } from '@/data/StoreAPI';
+
+function EditShipperModal({ shipperId, onClose }) {
   const [formData, setFormData] = useState({
     shipperName: '',
     phone: '',
-    store: {
-      storeID: ''
-    }
+    store: ''
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [stores, setStores] = useState([]);
 
   useEffect(() => {
-    const fetchShipper = async () => {
+    const fetchData = async () => {
       try {
         const shipperData = await getShipperById(shipperId);
-        setFormData(shipperData);
+        setFormData({
+          shipperName: shipperData.shipperName,
+          phone: shipperData.phone,
+          store: shipperData.store ? shipperData.store.storeID : ''
+        });
+        setLoading(false);
       } catch (error) {
         setError('Failed to fetch shipper information.');
-      } finally {
         setLoading(false);
       }
     };
 
-    fetchShipper();
+    fetchData();
   }, [shipperId]);
+
+  useEffect(() => {
+    const fetchStores = async () => {
+      try {
+        const response = await getAllStores();
+        if (response && Array.isArray(response)) {
+          setStores(response);
+        } else {
+          console.error('Empty response or missing data:', response);
+        }
+      } catch (error) {
+        console.error('Error fetching stores:', error);
+        setError('Failed to fetch stores.');
+      }
+    };
+
+    fetchStores();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name === 'storeID') {
-      setFormData({ ...formData, store: { ...formData.store, storeID: value } });
-    } else {
-      setFormData({ ...formData, [name]: value });
-    }
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      await updateShipperById(shipperId, formData);
+      await updateShipperById(shipperId, {
+        shipperName: formData.shipperName,
+        phone: formData.phone,
+        store: { storeID: formData.store }
+      });
       alert('Shipper updated successfully!');
       onClose();
       window.location.reload();
@@ -103,19 +127,25 @@ function EditShipperForm({ shipperId, onClose }) {
           </div>
 
           <div className="sm:col-span-3">
-            <label htmlFor="storeID" className="block text-sm font-medium leading-6 text-gray-900">
-              Store ID
+            <label htmlFor="store" className="block text-sm font-medium leading-6 text-gray-900">
+              Store
             </label>
             <div className="mt-2">
-              <input
-                id="storeID"
-                name="storeID"
-                type="text"
+              <select
+                id="store"
+                name="store"
                 className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 onChange={handleChange}
-                value={formData.store.storeID}
+                value={formData.store}
                 required
-              />
+              >
+                <option value="">Select a store</option>
+                {stores && stores.length > 0 && stores.map(store => (
+                  <option key={store._id} value={store._id}>
+                    {store.storeName}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
         </div>
@@ -133,9 +163,9 @@ function EditShipperForm({ shipperId, onClose }) {
   );
 }
 
-EditShipperForm.propTypes = {
+EditShipperModal.propTypes = {
   shipperId: PropTypes.string.isRequired,
   onClose: PropTypes.func.isRequired,
 };
 
-export default EditShipperForm;
+export default EditShipperModal;

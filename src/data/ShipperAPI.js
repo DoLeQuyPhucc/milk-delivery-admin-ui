@@ -37,7 +37,7 @@ export const createShipper = async (shipperData) => {
       const token = localStorage.getItem('token')
       const response = await axios.get(`https://milk-delivery-api.onrender.com/api/shippers/${shipperId}`,{
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `${token}`
         }
       });
       return response.data;
@@ -48,19 +48,22 @@ export const createShipper = async (shipperData) => {
   };
   export const updateShipperById = async (shipperId, shipperData) => {
     try {
-      const token = localStorage.getItem('token'); // Corrected the argument to be 'token' string
+      const token = localStorage.getItem('token'); // Ensure token is correct
+      console.log('Updating shipper:', shipperId, shipperData, token); // Log for debugging
       const response = await axios.put(`https://milk-delivery-api.onrender.com/api/shippers/${shipperId}`, shipperData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
+      console.log('Update response:', response.data); // Log response for debugging
       return response.data;
     } catch (error) {
       console.error('Failed to update shipper information:', error);
       throw error;
     }
   };
+  
   export const deleteShipperById = async (shipperId) => {
     try {
       const token = localStorage.getItem('token'); // Corrected the argument to be 'token' string

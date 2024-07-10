@@ -10,12 +10,16 @@ import {
   TruckIcon,
   ArchiveBoxIcon,
 } from "@heroicons/react/24/solid";
-import { Home, Profile, Tables, Notifications, UserManagement, OrderManagement, ShipperManagement, Demo } from "@/components/pages/dashboard";
+import { Home, Profile, Tables, Notifications, ShipperManagement, Demo } from "@/components/pages/dashboard";
 import { SignIn, SignUp } from "@/components/pages/auth";
 import ProductManagement from "./components/pages/dashboard/product-management";
 import PackageManagement from "./components/pages/dashboard/package-managment";
 import BrandManagement from "./components/pages/dashboard/brand-management";
 import StoreManagement from "./components/pages/dashboard/store-management";
+import UserManagement from "./components/pages/dashboard/user-management";
+import { CalendarFilled } from "@ant-design/icons";
+import OrderCalendar from "./components/pages/dashboard/calendar";
+import OrderManagement from "./components/pages/dashboard/order-management";
 
 
 const icon = {
@@ -86,6 +90,12 @@ export const routes = [
         path: "/setting",
         element: <Profile />,
       },
+      {
+        icon: <CalendarFilled {...icon}/>,
+        name: "calendar",
+        path: "/calendar",
+        element: <OrderCalendar/>,
+      }
     ],
   },
   {

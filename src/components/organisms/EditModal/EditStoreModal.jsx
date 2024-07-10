@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { getStoreById, updateStoreById } from '@/data/StoreAPI';
 
-function EditStoreForm({ storeId, onClose }) {
+function EditStoreModal({ storeId, onClose }) {
   const [formData, setFormData] = useState({
     storeName: '',
     address: '',
@@ -118,9 +118,9 @@ function EditStoreForm({ storeId, onClose }) {
   );
 }
 
-EditStoreForm.propTypes = {
+EditStoreModal.propTypes = {
   storeId: PropTypes.string.isRequired,
   onClose: PropTypes.func.isRequired,
 };
 
-export default EditStoreForm;
+export default EditStoreModal;

@@ -8,9 +8,10 @@ import {
   Button,
 } from "@material-tailwind/react";
 import CreateShipperForm from '@/components/organisms/CreateModal/CreateShipperForm';
-import EditShipperForm from '@/components/organisms/EditModal/EditShipperForm';
+
 import Modal from '@/components/organisms/Modal';
 import { deleteShipperById } from '@/data/ShipperAPI';
+import EditShipperModal from '@/components/organisms/EditModal/EditShipperModal';
 
 export function ShipperManagement() {
   const [shippers, setShippers] = useState([]);
@@ -65,7 +66,7 @@ export function ShipperManagement() {
           <Typography variant="h6" color="white">
             Shippers Table
           </Typography>
-          <Button onClick={() => setIsCreateModalOpen(true)}>Create Store</Button>
+          <Button onClick={() => setIsCreateModalOpen(true)}>Create Shipper</Button>
         </CardHeader>
         <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
           <table className="w-full min-w-[640px] table-auto">
@@ -144,7 +145,7 @@ export function ShipperManagement() {
       </Modal>
       <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)}>
         {selectedShipperId && (
-          <EditShipperForm shipperId={selectedShipperId} onClose={() => setIsEditModalOpen(false)} />
+          <EditShipperModal shipperId={selectedShipperId} onClose={() => setIsEditModalOpen(false)} />
         )}
       </Modal>
     </div>
