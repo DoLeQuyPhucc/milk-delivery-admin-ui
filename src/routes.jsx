@@ -79,18 +79,6 @@ export const routes = [
         element: <BrandManagement />,
       },
       {
-        icon: <ExclamationCircleIcon {...icon} />,
-        name: "Reports & Analytics",
-        path: "/reports-analytics",
-        element: <Profile />,
-      },
-      {
-        icon: <Cog8ToothIcon {...icon} />,
-        name: "setting",
-        path: "/setting",
-        element: <Profile />,
-      },
-      {
         icon: <CalendarFilled {...icon}/>,
         name: "calendar",
         path: "/calendar",
