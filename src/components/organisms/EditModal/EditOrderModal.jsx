@@ -49,7 +49,7 @@ function EditOrderModal({ date, onClose }) {
 
         fetchOrders();
         fetchShippers();
-    }, [date, orders]);
+    }, [date]);
 
     const handleShipperChange = (orderId, e) => {
         const value = e.target.value;
