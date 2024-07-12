@@ -9,6 +9,8 @@ import {
   InformationCircleIcon,
   TruckIcon,
   ArchiveBoxIcon,
+  ChartBarIcon,
+  InboxStackIcon,
 } from "@heroicons/react/24/solid";
 import { Home, Profile, Tables, Notifications, ShipperManagement, Demo } from "@/components/pages/dashboard";
 import { SignIn, SignUp } from "@/components/pages/auth";
@@ -22,6 +24,7 @@ import OrderCalendar from "./components/pages/dashboard/calendar";
 import OrderManagement from "./components/pages/dashboard/order-management";
 
 
+
 const icon = {
   className: "w-5 h-5 text-inherit",
 };
@@ -31,7 +34,7 @@ export const routes = [
     layout: "dashboard",
     pages: [
       {
-        icon: <HomeIcon {...icon} />,
+        icon: <ChartBarIcon {...icon} />,
         name: "dashboard",
         path: "/home",
         element: <Home />,
@@ -43,7 +46,7 @@ export const routes = [
         element: <ProductManagement />,
       },
       {
-        icon: <InformationCircleIcon {...icon} />,
+        icon: <InboxStackIcon {...icon} />,
         name: "package ",
         path: "/package",
         element: <PackageManagement />,
@@ -67,7 +70,7 @@ export const routes = [
         element: <ShipperManagement />,
       },
       {
-        icon: <ShoppingCartIcon {...icon} />,
+        icon: <HomeIcon {...icon} />,
         name: "store",
         path: "/store",
         element: <StoreManagement/>

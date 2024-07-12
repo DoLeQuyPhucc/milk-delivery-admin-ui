@@ -33,6 +33,15 @@ function EditOrderModal({ date, onClose }) {
                 const shippersData = await getAllShippers();
                 console.log('Fetched shippers:', shippersData);
                 setShippers(shippersData);
+                setShipperAssignments(prevState => {
+                    const updatedAssignments = { ...prevState };
+                    orders.forEach(order => {
+                        if (!updatedAssignments[order._id].shipperAssigned) {
+                            updatedAssignments[order._id].selectedShipper = '';
+                        }
+                    });
+                    return updatedAssignments;
+                });
             } catch (error) {
                 console.error('Failed to fetch shippers:', error);
             }
@@ -40,7 +49,7 @@ function EditOrderModal({ date, onClose }) {
 
         fetchOrders();
         fetchShippers();
-    }, [date]);
+    }, [date, orders]);
 
     const handleShipperChange = (orderId, e) => {
         const value = e.target.value;

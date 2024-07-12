@@ -106,7 +106,6 @@ function OrderCalendar() {
             if (existingButton) {
               existingButton.remove();
             }
-
             const button = document.createElement('button');
             button.className = 'details-button';
             button.textContent = 'Details';
