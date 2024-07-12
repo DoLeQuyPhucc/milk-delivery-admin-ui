@@ -1,22 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { getOrdersByDate } from '@/data/OrderAPI';
-import { updateOrderStatusById } from '@/data/OrderAPI';
+import { getOrdersByDate, assignShipperToOrder } from '@/data/OrderAPI';
 import { getAllShippers } from '@/data/ShipperAPI';
 
 function EditOrderModal({ date, onClose }) {
     const [orders, setOrders] = useState([]);
     const [shippers, setShippers] = useState([]);
-    const [selectedShipper, setSelectedShipper] = useState('');
-    const [shipperAssigned, setShipperAssigned] = useState(false); // Track if a shipper has been assigned
+    const [shipperAssignments, setShipperAssignments] = useState({});
 
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const dateStr = date.split('T')[0]; // Extract date string from ISO format
+                const dateStr = date.split('T')[0];
                 const ordersData = await getOrdersByDate(dateStr);
                 console.log('Fetched orders:', ordersData);
+                const initialAssignments = {};
+                ordersData.forEach(order => {
+                    initialAssignments[order._id] = {
+                        selectedShipper: order.order.shipper || '',
+                        shipperAssigned: !!order.order.shipper
+                    };
+                });
                 setOrders(ordersData);
+                setShipperAssignments(initialAssignments);
             } catch (error) {
                 console.error('Failed to fetch orders:', error);
             }
@@ -34,54 +40,56 @@ function EditOrderModal({ date, onClose }) {
 
         fetchOrders();
         fetchShippers();
-    }, [date]); // Fetch orders and shippers whenever date changes
+    }, [date]);
 
-    const handleShipperChange = (e) => {
-        setSelectedShipper(e.target.value);
+    const handleShipperChange = (orderId, e) => {
+        const value = e.target.value;
+        setShipperAssignments(prevState => ({
+            ...prevState,
+            [orderId]: { ...prevState[orderId], selectedShipper: value }
+        }));
     };
 
-    const handleCancel = () => {
-        setSelectedShipper('');
-        setShipperAssigned(false); // Reset shipper assignment
+    const handleCancel = (orderId) => {
+        setShipperAssignments(prevState => ({
+            ...prevState,
+            [orderId]: { ...prevState[orderId], selectedShipper: '', shipperAssigned: false }
+        }));
     };
 
-    const handleCancelOrder = async () => {
-        try {
-            // Example: Implement cancel order functionality
-            // await cancelOrderById(orders[0]._id);
-            console.log('Order canceled successfully!');
-            alert('Order canceled successfully!');
-            onClose();
-            // window.location.reload(); // Example: Reload the page to reflect changes
-        } catch (error) {
-            console.error('Failed to cancel order:', error);
-            alert('Error canceling order. Please try again.');
-        }
-    };
-
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (orderId, e) => {
         e.preventDefault();
+        const { selectedShipper } = shipperAssignments[orderId];
+        const order = orders.find(order => order._id === orderId);
+        const itemId = order?.order?._id;
+        console.log('Submitting with:', { orderId, selectedShipper, itemId });
+
+        if (!itemId) {
+            console.error('ItemId is missing.');
+            return;
+        }
 
         try {
-            await updateOrderStatusById(orders[0]._id, { shipper: selectedShipper }); // Assuming orders[0] as there's typically one order per date
-            console.log('Order status updated successfully!');
-            alert('Order status updated successfully!');
-            setShipperAssigned(true); // Mark shipper as assigned
-            onClose();
-            // window.location.reload(); // Example: Reload the page to reflect changes
+            await assignShipperToOrder(orderId, selectedShipper, itemId);
+            console.log('Shipper assigned successfully!');
+            alert('Shipper assigned successfully!');
+            setShipperAssignments(prevState => ({
+                ...prevState,
+                [orderId]: { ...prevState[orderId], shipperAssigned: true }
+            }));
         } catch (error) {
-            console.error('Failed to update order status:', error);
-            alert('Error updating order status. Please try again.');
+            console.error('Failed to assign shipper:', error);
+            alert('Error assigning shipper. Please try again.');
         }
     };
 
     return (
         <div className="border-b border-gray-900/10 pb-12">
-            <h2 className="text-base font-semibold leading-7 text-gray-900">Update Order Status</h2>
-            <p className="mt-1 text-sm leading-6 text-gray-600">Update the order status below.</p>
+            <h2 className="text-base font-semibold leading-7 text-gray-900">Assign Shipper to Order</h2>
+            <p className="mt-1 text-sm leading-6 text-gray-600">Assign the shipper to order below.</p>
 
             <div className="overflow-x-auto">
-                <form onSubmit={handleSubmit}>
+                <form>
                     <div className="sm:col-span-6 mt-6">
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead>
@@ -96,13 +104,10 @@ function EditOrderModal({ date, onClose }) {
                                         Full Name
                                     </th>
                                     <th scope="col" className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Delivery Status
+                                        Order Status
                                     </th>
                                     <th scope="col" className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Shipper Actions
-                                    </th>
-                                    <th scope="col" className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Order Actions
                                     </th>
                                 </tr>
                             </thead>
@@ -126,50 +131,35 @@ function EditOrderModal({ date, onClose }) {
                                                 {order.shippingAddress.fullName}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                Delivered: {order.order.isDelivered ? 'Yes' : 'No'}
+                                                {order.order.status}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                {!order.order.isDelivered && !shipperAssigned && (
-                                                    <>
-                                                        <select
-                                                            id="shipper"
-                                                            name="shipper"
-                                                            value={selectedShipper}
-                                                            onChange={handleShipperChange}
-                                                            className="block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50 sm:text-sm"
-                                                        >
-                                                            <option value="">Select a shipper...</option>
-                                                            {shippers.map((shipper) => (
-                                                                <option key={shipper._id} value={shipper._id}>
-                                                                    {shipper.shipperName}
-                                                                </option>
-                                                            ))}
-                                                        </select>
-                                                        <div className="flex mt-2">
-                                                            <button
-                                                                type="button"
-                                                                onClick={handleCancel}
-                                                                className="inline-flex justify-center py-2 px-4 mr-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                                                            >
-                                                                Cancel Shipper
-                                                            </button>
-                                                            <button
-                                                                type="submit"
-                                                                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                                                            >
-                                                                Apply Shipper
-                                                            </button>
-                                                        </div>
-                                                    </>
-                                                )}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <select
+                                                    value={shipperAssignments[order._id]?.selectedShipper || ''}
+                                                    onChange={(e) => handleShipperChange(order._id, e)}
+                                                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                                                >
+                                                    <option value="">Select shipper</option>
+                                                    {shippers.map((shipper) => (
+                                                        <option key={shipper._id} value={shipper._id}>
+                                                            {shipper.shipperName}
+                                                        </option>
+                                                    ))}
+                                                </select>
                                                 <button
                                                     type="button"
-                                                    onClick={handleCancelOrder}
-                                                    className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                                    onClick={(e) => handleSubmit(order._id, e)}
+                                                    disabled={!shipperAssignments[order._id]?.selectedShipper || shipperAssignments[order._id]?.shipperAssigned}
+                                                    className={`ml-2 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white ${shipperAssignments[order._id]?.shipperAssigned ? 'bg-green-500 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'}`}
                                                 >
-                                                    Cancel Order
+                                                    {shipperAssignments[order._id]?.shipperAssigned ? 'Assigned' : 'Assign'}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleCancel(order._id)}
+                                                    className="ml-2 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                                >
+                                                    Cancel
                                                 </button>
                                             </td>
                                         </tr>
@@ -185,8 +175,8 @@ function EditOrderModal({ date, onClose }) {
 }
 
 EditOrderModal.propTypes = {
-    date: PropTypes.string.isRequired, // Prop type changed to `date` instead of `orderId`
-    onClose: PropTypes.func.isRequired
+    date: PropTypes.string.isRequired,
+    onClose: PropTypes.func.isRequired,
 };
 
 export default EditOrderModal;

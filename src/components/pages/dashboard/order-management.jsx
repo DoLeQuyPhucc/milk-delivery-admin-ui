@@ -26,6 +26,19 @@ function OrderManagement() {
 
     fetchOrders();
   }, []);
+  const handleCancelOrder = async (orderId) => {
+    try {
+      // Example: Implement cancel order functionality
+      // await cancelOrderById(orderId);
+      console.log('Order canceled successfully!');
+      alert('Order canceled successfully!');
+      onClose();
+      // window.location.reload(); // Example: Reload the page to reflect changes
+    } catch (error) {
+      console.error('Failed to cancel order:', error);
+      alert('Error canceling order. Please try again.');
+    }
+  };
 
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
@@ -39,7 +52,7 @@ function OrderManagement() {
           <table className="w-full min-w-[640px] table-auto">
             <thead>
               <tr>
-                {["ID", "Total Amount", "Total Price", "Status", "Payment Method", "User", "Delivered At"].map((el) => (
+                {["ID", "Total Amount", "Total Price", "Status", "Payment Method", "Shipper", "User", "Delivered At", "Action"].map((el) => (
                   <th
                     key={el}
                     className="border-b border-blue-gray-50 py-3 px-5 text-left"
@@ -56,9 +69,8 @@ function OrderManagement() {
             </thead>
             <tbody>
               {orders.map((order, key) => {
-                const className = `py-3 px-5 ${
-                  key === orders.length - 1 ? "" : "border-b border-blue-gray-50"
-                }`;
+                const className = `py-3 px-5 ${key === orders.length - 1 ? "" : "border-b border-blue-gray-50"
+                  }`;
 
                 return (
                   <tr key={order._id}>
@@ -91,8 +103,15 @@ function OrderManagement() {
                       </Typography>
                     </td>
                     <td className={className}>
+                      <div className="flex items-center">
+                        <Typography className="text-xs font-semibold text-blue-gray-600 ml-2">
+                          {order.shipper}
+                        </Typography>
+                      </div>
+                    </td>
+                    <td className={className}>
                       <Typography className="text-xs font-semibold text-blue-gray-600">
-                        {order.user}
+                      {order.shippingAddress.fullName}
                       </Typography>
                     </td>
                     <td className={className}>

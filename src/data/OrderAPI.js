@@ -1,5 +1,5 @@
 import axios from "axios";
-import { func } from "prop-types";
+
 
 export async function getAllOrders() {
     const url = 'https://milk-delivery-api.onrender.com/api/orders/getAllOrders';
@@ -48,11 +48,39 @@ export async function updateOrderStatusById(orderId) {
     }   
 }
 export const getOrdersByDate = async (date) => {
-    try {
-      const response = await axios.get(`https://milk-delivery-api.onrender.com/api/orders/getByDate/${date}`);
+  const token = localStorage.getItem('token');
+  try {
+      const response = await axios.get(`https://milk-delivery-api.onrender.com/api/orders/getByDate/${date}`, {
+          headers: {
+              'Authorization': `Bearer ${token}`
+          }
+      });
       return response.data;
-    } catch (error) {
+  } catch (error) {
       console.error('Error fetching orders by date:', error);
       throw error;
+  }
+};
+
+
+  export const assignShipperToOrder = async (orderId, shipperId, itemId) => {
+    const apiUrl = 'https://milk-delivery-api.onrender.com/api/orders/assignShipper';
+    const requestBody = {
+        orderId,
+        shipperId,
+        itemId
+    };
+    const token = localStorage.getItem('token');
+    try {
+        const response = await axios.post(apiUrl, requestBody, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error assigning shipper to order:', error);
+        throw error;
     }
-  };
+};

@@ -4,9 +4,16 @@ import { getAllStores } from '@/data/StoreAPI';
 
 function CreateShipperForm() {
   const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    userName: '',
+    avataImage: '',
+    email: '',
+    phoneNumber: '',
+    password: '',
+    address: '',
     shipperName: '',
-    phone: '',
-    storeID: ''
+    role:'SHIPPER'
   });
 
   const [stores, setStores] = useState([]);
@@ -40,11 +47,16 @@ function CreateShipperForm() {
 
     try {
       const newShipper = await createShipper({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        userName: formData.userName,
+        avataImage: formData.avataImage,
+        email: formData.email,
+        phoneNumber: formData.phoneNumber,
+        password: formData.password,
+        address: formData.address,
         shipperName: formData.shipperName,
-        phone: formData.phone,
-        store: {
-          storeID: formData.storeID
-        }
+        role: formData.role
       });
       console.log('Shipper created:', newShipper);
       alert('Shipper created successfully!');
@@ -69,15 +81,79 @@ function CreateShipperForm() {
       <form onSubmit={handleSubmit}>
         <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
           <div className="sm:col-span-3">
-            <label htmlFor="shipperName" className="block text-sm font-medium leading-6 text-gray-900">
-              Shipper Name
+            <label htmlFor="firstName" className="block text-sm font-medium leading-6 text-gray-900">
+              First Name
             </label>
             <div className="mt-2">
               <input
                 type="text"
-                name="shipperName"
-                id="shipperName"
-                autoComplete="shipper-name"
+                name="firstName"
+                id="firstName"
+                autoComplete="given-name"
+                className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="sm:col-span-3">
+            <label htmlFor="lastName" className="block text-sm font-medium leading-6 text-gray-900">
+              Last Name
+            </label>
+            <div className="mt-2">
+              <input
+                type="text"
+                name="lastName"
+                id="lastName"
+                autoComplete="family-name"
+                className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+          <div className='sm:col-span-3'>
+            <label htmlFor='userName' className='block text-sm font-medium leading-6 text-gray-900'>
+              User Name
+            </label>
+            <div className='mt-2'>
+              <input
+                type='text'
+                name='userName'
+                id='userName'
+                autoComplete='username'
+                className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
+                onChange={handleChange}
+              />
+              </div>
+          </div>
+          <div className="sm:col-span-3">
+            <label htmlFor="avataImage" className="block text-sm font-medium leading-6 text-gray-900">
+              Avatar Image URL
+            </label>
+            <div className="mt-2">
+              <input
+                type="text"
+                name="avataImage"
+                id="avataImage"
+                autoComplete="url"
+                className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+
+          <div className="sm:col-span-3">
+            <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
+              Email
+            </label>
+            <div className="mt-2">
+              <input
+                type="email"
+                name="email"
+                id="email"
+                autoComplete="email"
                 className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 onChange={handleChange}
                 required
@@ -86,13 +162,13 @@ function CreateShipperForm() {
           </div>
 
           <div className="sm:col-span-2">
-            <label htmlFor="phone" className="block text-sm font-medium leading-6 text-gray-900">
+            <label htmlFor="phoneNumber" className="block text-sm font-medium leading-6 text-gray-900">
               Phone Number
             </label>
             <div className="mt-2">
               <input
-                id="phone"
-                name="phone"
+                id="phoneNumber"
+                name="phoneNumber"
                 type="text"
                 autoComplete="tel"
                 className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
@@ -103,26 +179,56 @@ function CreateShipperForm() {
           </div>
 
           <div className="sm:col-span-2">
-            <label htmlFor="storeID" className="block text-sm font-medium leading-6 text-gray-900">
-              Store
+            <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
+              Password
             </label>
             <div className="mt-2">
-              <select
-                id="storeID"
-                name="storeID"
+              <input
+                type="password"
+                name="password"
+                id="password"
+                autoComplete="new-password"
                 className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 onChange={handleChange}
                 required
-              >
-                <option value="">Select a store</option>
-                {stores.map(store => (
-                  <option key={store._id} value={store._id}>{store.storeName}</option>
-                ))}
-              </select>
+              />
+            </div>
+          </div>
+
+          <div className="sm:col-span-3">
+            <label htmlFor="address" className="block text-sm font-medium leading-6 text-gray-900">
+              Address
+            </label>
+            <div className="mt-2">
+              <input
+                type="text"
+                name="address"
+                id="address"
+                autoComplete="street-address"
+                className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="sm:col-span-3">
+            <label htmlFor="shipperName" className="block text-sm font-medium leading-6 text-gray-900">
+              Shipper Name
+            </label>
+            <div className="mt-2">
+              <input
+                type="text"
+                name="shipperName"
+                id="shipperName"
+                autoComplete="organization"
+                className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                onChange={handleChange}
+                required
+              />
             </div>
           </div>
         </div>
-
         <div className="mt-6">
           <button
             type="submit"

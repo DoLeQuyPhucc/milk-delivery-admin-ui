@@ -1,26 +1,29 @@
 import axios from 'axios';
 
-// Function to get all shippers
 export const getAllShippers = async () => {
-    const token = localStorage.getItem('token');
+  const token = localStorage.getItem('token');
+
   try {
     const response = await axios.get('https://milk-delivery-api.onrender.com/api/shippers/getAllShippers', {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
     });
     const shippers = response.data;
     return shippers;
   } catch (error) {
-    // Handle any errors that occur during the request
+    // Log the error for debugging purposes
     console.error('Error fetching shippers:', error);
+
+    // Rethrow the error to propagate it to the caller
     throw error;
   }
 };
+
 export const createShipper = async (shipperData) => {
     const token = localStorage.getItem('token');
     try {
-      const response = await axios.post('https://milk-delivery-api.onrender.com/api/shippers', shipperData, {
+      const response = await axios.post('https://milk-delivery-api.onrender.com/api/users/createShipper', shipperData, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -37,7 +40,7 @@ export const createShipper = async (shipperData) => {
       const token = localStorage.getItem('token')
       const response = await axios.get(`https://milk-delivery-api.onrender.com/api/shippers/${shipperId}`,{
         headers: {
-          'Authorization': `${token}`
+          'Authorization': `Bearer ${token}`
         }
       });
       return response.data;
@@ -79,3 +82,4 @@ export const createShipper = async (shipperData) => {
       throw error;
     }
   };
+  

@@ -22,14 +22,14 @@ getAllUsers().then(users => {
   console.error('Error fetching users:', error);
 });
 
-export const LogIn = async (email, password) => {
+export const LogIn = async (userName, password) => {
   // Logic to fetch user data and token
   const response = await fetch('https://milk-delivery-api.onrender.com/api/auth/signin', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ userName, password }),
   });
 
   if (!response.ok) {

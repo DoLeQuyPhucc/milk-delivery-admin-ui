@@ -19,7 +19,7 @@ function Modal({ isOpen, children, onClose }) {
         <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-xl sm:w-full">
           {/* Modal header with close button */}
           <div className="flex justify-between items-start p-4 border-b">
-            <h2 className="text-xl font-medium text-gray-900">CREATE</h2>
+            <h2 className="text-xl font-medium text-gray-900">MANAGE</h2>
             <button onClick={onClose} className="text-2xl p-1 rounded hover:bg-gray-200">
               <CloseOutlined />
             </button>

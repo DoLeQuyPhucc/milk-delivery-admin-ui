@@ -6,25 +6,29 @@ import {
   CardBody,
   Typography,
   Button,
+  Select,
+  MenuItem,
 } from "@material-tailwind/react";
 import CreateShipperForm from '@/components/organisms/CreateModal/CreateShipperForm';
-
 import Modal from '@/components/organisms/Modal';
-import { deleteShipperById } from '@/data/ShipperAPI';
+import { deleteShipperById, getAllShippers } from '@/data/ShipperAPI';
 import EditShipperModal from '@/components/organisms/EditModal/EditShipperModal';
+import { getAllStores } from '@/data/StoreAPI'; // Import getAllStores function
 
 export function ShipperManagement() {
   const [shippers, setShippers] = useState([]);
+  const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedShipperId, setSelectedShipperId] = useState(null);
+  const [selectedStoreId, setSelectedStoreId] = useState({});
 
   useEffect(() => {
     const fetchShippers = async () => {
       try {
-        const response = await axios.get('https://milk-delivery-api.onrender.com/api/shippers/getAllShippers');
-        setShippers(response.data);
+        const response = await getAllShippers();
+        setShippers(response); // Assuming response directly returns an array of shippers
       } catch (error) {
         console.error('Error fetching shippers:', error);
       } finally {
@@ -32,13 +36,24 @@ export function ShipperManagement() {
       }
     };
 
+    const fetchStores = async () => {
+      try {
+        const response = await getAllStores();
+        setStores(response); // Assuming response directly returns an array of stores
+      } catch (error) {
+        console.error('Error fetching stores:', error);
+      }
+    };
+
     fetchShippers();
+    fetchStores();
   }, []);
 
   const openEditModal = (shipperId) => {
     setSelectedShipperId(shipperId);
     setIsEditModalOpen(true);
   };
+
   const handleDeleteClick = async (shipperId) => {
     if (window.confirm('Are you sure you want to delete this shipper?')) {
       try {
@@ -49,6 +64,13 @@ export function ShipperManagement() {
         alert('Failed to delete shipper. Please try again.');
       }
     }
+  };
+
+  const handleStoreChange = (shipperId, event) => {
+    const selectedStoreID = event.target.value;
+    setSelectedStoreId({ [shipperId]: selectedStoreID });
+    // Update the selected store ID for the shipper in your state or API
+    console.log(`Selected store ID for shipper ${shipperId}:`, selectedStoreID);
   };
 
   if (loading) {
@@ -72,7 +94,7 @@ export function ShipperManagement() {
           <table className="w-full min-w-[640px] table-auto">
             <thead>
               <tr>
-                {["Name", "Phone", "Store ID", "Action"].map((el) => (
+                {["Name", "Phone", "Action"].map((el) => (
                   <th
                     key={el}
                     className="border-b border-blue-gray-50 py-3 px-5 text-left"
@@ -108,11 +130,6 @@ export function ShipperManagement() {
                     <td className={className}>
                       <Typography className="text-xs font-semibold text-blue-gray-600">
                         {phone}
-                      </Typography>
-                    </td>
-                    <td className={className}>
-                      <Typography className="text-xs font-semibold text-blue-gray-600">
-                        {store.storeID}
                       </Typography>
                     </td>
                     <td className={className}>

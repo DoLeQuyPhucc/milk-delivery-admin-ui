@@ -4,7 +4,7 @@ import { updateUserById, getUserById } from '@/data/UserAPI';
 function EditUserModal({ userId, onClose }) {
   const [formData, setFormData] = useState({
     email: '',
-    username: '',
+    userName: '',
     firstName: '',
     lastName: '',
     avatarImage: '',
@@ -21,7 +21,7 @@ function EditUserModal({ userId, onClose }) {
         if (user) {
           setFormData({
             email: user.email || '',
-            username: user.username || '',
+            userName: user.userName || '',
             firstName: user.firstName || '',
             lastName: user.lastName || '',
             avatarImage: user.avatarImage || '',
@@ -139,6 +139,23 @@ function EditUserModal({ userId, onClose }) {
             </div>
           </div>
 
+          <div className="sm:col-span-3">
+            <label htmlFor="username" className="block text-sm font-medium leading-6 text-gray-900">
+              Username
+            </label>
+            <div className="mt-2">
+              <input
+                id="username"
+                name="userName"
+                type="text"
+                value={formData.userName}
+                onChange={handleChange}
+                className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                required
+              />
+            </div>
+          </div>
+
           <div className="sm:col-span-3" hidden>
             <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900" >
               Password
@@ -171,7 +188,24 @@ function EditUserModal({ userId, onClose }) {
                 <option value="USER">USER</option>
                 <option value="ADMIN">ADMIN</option>
                 <option value="MANAGER">MANAGER</option>
+                <option value="SHIPPER">SHIPPER</option>
               </select>
+            </div>
+          </div>
+
+          <div className="col-span-full">
+            <label htmlFor="avatarImage" className="block text-sm font-medium leading-6 text-gray-900">
+              Avatar Image URL
+            </label>
+            <div className="mt-2">
+              <input
+                id="avatarImage"
+                name="avatarImage"
+                type="url"
+                value={formData.avatarImage}
+                onChange={handleChange}
+                className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              />
             </div>
           </div>
 
