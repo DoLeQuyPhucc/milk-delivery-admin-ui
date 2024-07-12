@@ -3,10 +3,9 @@ import { Calendar } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import timeGridPlugin from '@fullcalendar/timegrid';
-import { getAllOrders } from '@/data/OrderAPI';
+import { getAllOrders, getOrdersByDate } from '@/data/OrderAPI';
 import EditOrderModal from '@/components/organisms/EditModal/EditOrderModal';
 import Modal from '@/components/organisms/Modal';
-import { getOrdersByDate } from '@/data/OrderAPI';
 import './calendar.css';
 
 function OrderCalendar() {
@@ -20,17 +19,19 @@ function OrderCalendar() {
       try {
         const data = await getAllOrders();
 
-        // Step 1: Aggregate deliveries by date
+        // Step 1: Aggregate deliveries by date, filtering out non-pending orders
         const deliveriesByDate = data.reduce((acc, order) => {
           order.circleShipment.tracking.forEach(tracking => {
-            const dateStr = new Date(tracking.deliveredAt).toDateString();
-            if (!acc[dateStr]) {
-              acc[dateStr] = [];
+            if (tracking.status === 'Pending') {
+              const dateStr = new Date(tracking.deliveredAt).toDateString();
+              if (!acc[dateStr]) {
+                acc[dateStr] = [];
+              }
+              acc[dateStr].push({
+                ...order,
+                tracking
+              });
             }
-            acc[dateStr].push({
-              ...order,
-              tracking
-            });
           });
           return acc;
         }, {});
@@ -56,9 +57,8 @@ function OrderCalendar() {
           if (numOrders > maxToShow) {
             formattedEvents.push({
               id: `more-${date}`,
-              title: `...${numOrders - maxToShow - 1} more order(s)`,
+              title: `...${numOrders - maxToShow} more order(s)`,
               start: new Date(date),
-              // Ensure the rest of the placeholder object is correctly closed and formatted
             });
           }
         });
@@ -77,7 +77,7 @@ function OrderCalendar() {
       const dateStr = date.toISOString().split('T')[0];
       const orders = await getOrdersByDate(dateStr);
       setSelectedOrders(orders);
-      setSelectedDate(date); // Update selected date
+      setSelectedDate(date);
       setIsModalOpen(true);
     } catch (error) {
       console.error('Error fetching orders by date:', error);

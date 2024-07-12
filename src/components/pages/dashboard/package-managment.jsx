@@ -46,6 +46,7 @@ function PackageManagement() {
       try {
         await deletePackageById(packageId);
         setPackages((prevPackages) => prevPackages.filter((pkg) => pkg._id !== packageId));
+        alert('Package delete successfully')
       } catch (error) {
         console.error('Error deleting package:', error);
         alert('Failed to delete package. Please try again.');
