@@ -18,59 +18,47 @@ function OrderCalendar() {
     const fetchOrders = async () => {
       try {
         const data = await getAllOrders();
-
-        // Step 1: Aggregate deliveries by date, filtering out non-pending orders
+  
         const deliveriesByDate = data.reduce((acc, order) => {
           order.circleShipment.tracking.forEach(tracking => {
             if (tracking.status === 'Pending') {
-              const dateStr = new Date(tracking.deliveredAt).toDateString();
+              const deliveredAt = new Date(tracking.deliveredAt); // Convert deliveredAt to Date object
+              const dateStr = deliveredAt.toISOString().split('T')[0];
               if (!acc[dateStr]) {
                 acc[dateStr] = [];
               }
               acc[dateStr].push({
                 ...order,
-                tracking
+                tracking,
+                start: deliveredAt, // Use deliveredAt as start Date object
               });
             }
           });
           return acc;
         }, {});
-
+  
         // Step 2: Format orders for display
         const formattedEvents = [];
         Object.keys(deliveriesByDate).forEach((date) => {
           const orders = deliveriesByDate[date];
           const numOrders = orders.length;
-          const maxToShow = 3;
-
-          // Display up to maxToShow orders
-          for (let i = 0; i < Math.min(numOrders, maxToShow); i++) {
-            formattedEvents.push({
-              id: `${orders[i]._id}-${i}`,
-              title: `Order`,
-              start: new Date(orders[i].tracking.deliveredAt),
-              description: `Total Price: ${orders[i].package.totalPrice}`,
-            });
-          }
-
-          // If there are more orders than maxToShow, add a placeholder
-          if (numOrders > maxToShow) {
-            formattedEvents.push({
-              id: `more-${date}`,
-              title: `...${numOrders - maxToShow} more order(s)`,
-              start: new Date(date),
-            });
-          }
+          formattedEvents.push({
+            id: date,
+            title: `${numOrders} Orders`,
+            start: new Date(date), // Convert date string to Date object
+            description: `Total Orders: ${numOrders}`,
+          });
         });
-
+  
         setEvents(formattedEvents);
       } catch (error) {
         console.error('Error fetching orders:', error);
       }
     };
-
+  
     fetchOrders();
   }, []);
+  
 
   const handleDetailsClick = async (date) => {
     try {
@@ -102,12 +90,8 @@ function OrderCalendar() {
           const cell = document.querySelector(`.fc-daygrid-day[data-date="${dateStr}"]`);
 
           if (cell && events.some(event => event.start.toISOString().split('T')[0] === dateStr)) {
-            const existingButton = cell.querySelector('.details-button');
-            if (existingButton) {
-              existingButton.remove();
-            }
             const button = document.createElement('button');
-            button.className = 'details-button';
+            button.className = 'details-button';  
             button.textContent = 'Details';
             button.addEventListener('click', (e) => {
               e.preventDefault();
