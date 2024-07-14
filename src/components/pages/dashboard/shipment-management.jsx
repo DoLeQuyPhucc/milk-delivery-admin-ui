@@ -2,14 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { getOrdersByDate, assignShipperToOrder } from '@/data/OrderAPI';
 import { getAllShippers } from '@/data/ShipperAPI';
 import { Card, CardHeader, CardBody, Typography, Chip } from '@material-tailwind/react';
+import Modal from '@/components/organisms/Modal'; // Import your Modal component
+import EditOrderModal from '@/components/organisms/EditModal/EditOrderModal';
 import './calendar.css';
 
-function ShipmentManagment() {
+function ShipmentManagement() {
   const [selectedDate, setSelectedDate] = useState('');
   const [orders, setOrders] = useState([]);
   const [shippers, setShippers] = useState([]);
   const [selectedOrders, setSelectedOrders] = useState([]);
   const [shipperAssignments, setShipperAssignments] = useState({});
+  const [isModalOpen, setIsModalOpen] = useState(false); // State for general modal control
+  const [editModalDate, setEditModalDate] = useState(''); // State to pass date to modal
 
   const handleDateChange = async (event) => {
     const date = event.target.value;
@@ -18,6 +22,7 @@ function ShipmentManagment() {
     try {
       const ordersData = await getOrdersByDate(date);
       setOrders(ordersData);
+
       const initialAssignments = {};
       ordersData.forEach(order => {
         initialAssignments[order._id] = {
@@ -58,30 +63,35 @@ function ShipmentManagment() {
 
   const handleSubmit = async (orderId, e) => {
     e.preventDefault();
-    const { selectedShipper } = shipperAssignments[orderId];
-    const order = orders.find(order => order._id === orderId);
-    const itemId = order?.order?._id;
-    console.log('Submitting with:', { orderId, selectedShipper, itemId });
-
-    if (!itemId) {
-      console.error('ItemId is missing.');
-      return;
-    }
-
+  
     try {
-      await assignShipperToOrder(orderId, selectedShipper, itemId);
-      console.log('Shipper assigned successfully!');
+      const { selectedShipper } = shipperAssignments[orderId];
+      const order = orders.find((order) => order._id === orderId);
+      let itemIds = [];
+  
+      if (order && order.order && Array.isArray(order.order)) {
+        itemIds = order.order.map((item) => item._id);
+      } else if (order && order.order && order.order._id) {
+        itemIds = [order.order._id];
+      } else {
+        console.error('Invalid structure for order items:', order.order);
+        return;
+      }
+  
+      await assignShipperToOrder(orderId, selectedShipper, itemIds);
+      console.log(`Shipper assigned successfully to order ${orderId}!`);
+  
+      // Refresh orders after assignment
+      const updatedOrders = await getOrdersByDate(selectedDate);
+      setOrders(updatedOrders);
+  
       alert('Shipper assigned successfully!');
-      setShipperAssignments(prevState => ({
-        ...prevState,
-        [orderId]: { ...prevState[orderId], shipperAssigned: true }
-      }));
     } catch (error) {
-      console.error('Failed to assign shipper:', error);
-      alert('Error assigning shipper. Please try again.');
+      console.error('Failed to assign shippers:', error);
+      alert('Error assigning shippers. Please try again.');
     }
   };
-
+  
   useEffect(() => {
     const fetchShippers = async () => {
       try {
@@ -119,8 +129,31 @@ function ShipmentManagment() {
     }
   };
 
+  const getShipperNameById = (shipperId) => {
+    const shipper = shippers.find(shipper => shipper._id === shipperId);
+    return shipper ? shipper.shipperName : 'N/A';
+  };
+
+  const openEditModal = (date) => {
+    setIsModalOpen(true);
+    setEditModalDate(date);
+  };
+
+  const closeEditModal = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <div>
+      <Modal isOpen={isModalOpen} onClose={closeEditModal}>
+        {selectedDate && (
+          <EditOrderModal
+            date={editModalDate} // Pass the selected date to EditOrderModal
+            onClose={closeEditModal}
+          />
+        )}
+      </Modal>
+
       <div className="date-picker">
         <label htmlFor="order-date">Select Date: </label>
         <input
@@ -131,24 +164,24 @@ function ShipmentManagment() {
         />
       </div>
       <div className="mt-12 mb-8 flex flex-col gap-12">
+        <button
+          onClick={() => openEditModal(selectedDate)}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Open Edit Modal
+        </button>
+
         <Card>
           <CardHeader variant="gradient" color="gray" className="mb-8 p-6">
             <Typography variant="h6" color="white">
-              Orders Table
+              Shipments Table
             </Typography>
           </CardHeader>
           <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
             <table className="w-full min-w-[640px] table-auto">
               <thead>
                 <tr>
-                  <th className="border-b border-blue-gray-50 py-3 px-5 text-left">
-                    <Typography
-                      variant="small"
-                      className="text-[11px] font-bold uppercase text-blue-gray-400"
-                    >
-                      Select
-                    </Typography>
-                  </th>
+
                   {["Number", "Paying Status", "Total Price", "Status", "Address", "Shipper", "Customer", "Actions"].map((el) => (
                     <th
                       key={el}
@@ -166,18 +199,12 @@ function ShipmentManagment() {
               </thead>
               <tbody>
                 {orders.map((order, key) => {
-                  const className = `py-3 px-5 ${key === orders.length - 1 ? "" : "border-b border-blue-gray-50"
-                    }`;
+                  const className = `py-3 px-5 ${key === orders.length - 1 ? "" : "border-b border-blue-gray-50"}`;
+
+                  const shipperName = getShipperNameById(order.order.shipper);
 
                   return (
-                    <tr key={order._id}>
-                      <td className={className}>
-                        <input
-                          type="checkbox"
-                          checked={selectedOrders.includes(order._id)}
-                          onChange={() => handleCheckboxChange(order._id)}
-                        />
-                      </td>
+                    <tr key={order._id}> 
                       <td className={className}>
                         <Typography className="text-xs font-semibold text-blue-gray-600">
                           {key + 1}
@@ -206,53 +233,51 @@ function ShipmentManagment() {
                       </td>
                       <td className={className}>
                         <Typography className="text-xs font-semibold text-blue-gray-600">
-                          {order.shippingAddress.fullName}
+                          {order.shippingAddress.address}, {order.shippingAddress.city}, {order.shippingAddress.country}
                         </Typography>
                       </td>
                       <td className={className}>
                         <div className="flex items-center">
                           <Typography className="text-xs font-semibold text-blue-gray-600 ml-2">
-                            {order.shipper}
+                            {shipperName}
                           </Typography>
                         </div>
                       </td>
                       <td className={className}>
                         <Typography className="text-xs font-semibold text-blue-gray-600">
-                          {order.shippingAddress.address}, {order.shippingAddress.city}, {order.shippingAddress.country}
+                          {order.shippingAddress.fullName}
                         </Typography>
                       </td>
-                      
                       <td className={className}>
-                        <select
-                          value={shipperAssignments[order._id]?.selectedShipper || ''}
-                          onChange={(e) => handleShipperChange(order._id, e)}
-                          disabled={shipperAssignments[order._id]?.shipperAssigned}
-                          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                        >
-                          <option value="">Select shipper</option>
-                          {shippers.map((shipper) => (
-                            <option key={shipper._id} value={shipper._id}>
-                              {shipper.shipperName}
-                            </option>
-                          ))}
-                        </select>
-                        <button
-                          type="button"
-                          onClick={(e) => handleSubmit(order._id, e)}
-                          disabled={!shipperAssignments[order._id]?.selectedShipper || shipperAssignments[order._id]?.shipperAssigned}
-                          className={`ml-2 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white ${shipperAssignments[order._id]?.shipperAssigned ? 'bg-green-500 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
-                            }`}
-                        >
-                          {shipperAssignments[order._id]?.shipperAssigned ? 'Assigned' : 'Assign'}
-                        </button>
-                        {shipperAssignments[order._id]?.shipperAssigned && (
-                          <button
-                            type="button"
-                            onClick={() => handleCancel(order._id)}
-                            className="ml-2 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                          >
-                            Cancel
-                          </button>
+                        {shipperName === 'N/A' && order.order.shipper == null && (
+                          <>
+                            {!shipperAssignments[order._id]?.shipperAssigned && (
+                              <>
+                                <select
+                                  value={shipperAssignments[order._id]?.selectedShipper || ''}
+                                  onChange={(e) => handleShipperChange(order._id, e)}
+                                  disabled={shipperAssignments[order._id]?.shipperAssigned}
+                                  className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                                >
+                                  <option value="">Select shipper</option>
+                                  {shippers.map((shipper) => (
+                                    <option key={shipper._id} value={shipper._id}>
+                                      {shipper.shipperName}
+                                    </option>
+                                  ))}
+                                </select>
+                                <button
+                                  type="button"
+                                  onClick={(e) => handleSubmit(order._id, e)}
+                                  disabled={!shipperAssignments[order._id]?.selectedShipper || shipperAssignments[order._id]?.shipperAssigned}
+                                  className={`ml-2 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white ${shipperAssignments[order._id]?.shipperAssigned ? 'bg-green-500 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+                                    }`}
+                                >
+                                  {shipperAssignments[order._id]?.shipperAssigned ? 'Assigned' : 'Assign'}
+                                </button>
+                              </>
+                            )}
+                          </>
                         )}
                       </td>
                     </tr>
@@ -267,4 +292,4 @@ function ShipmentManagment() {
   );
 }
 
-export default ShipmentManagment;
+export default ShipmentManagement;

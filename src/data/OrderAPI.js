@@ -63,12 +63,12 @@ export const getOrdersByDate = async (date) => {
 };
 
 
-  export const assignShipperToOrder = async (orderId, shipperId, itemId) => {
+  export const assignShipperToOrder = async (orderId, shipperId, itemIds) => {
     const apiUrl = 'https://milk-delivery-api.onrender.com/api/orders/assignShipper';
     const requestBody = {
         orderId,
         shipperId,
-        itemId
+        itemIds
     };
     const token = localStorage.getItem('token');
     try {
