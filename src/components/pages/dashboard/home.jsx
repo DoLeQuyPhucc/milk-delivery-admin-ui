@@ -9,23 +9,34 @@ import {
   ChartBarIcon,
 } from "@heroicons/react/24/solid";
 import { StatisticsCard } from "@/components/atoms/cards";
-import { StatisticsChart } from "@/components/atoms/charts";
-import {
-  statisticsChartsData,
-} from "@/data";
+import { Line } from 'react-chartjs-2';
 import {
   getTotalDeliveredOrders,
   getTotalCancelledOrders,
   getTotalUserOrders,
-  getTotalPriceOfAllOrders
+  getTotalPriceOfAllOrders,
+  getTotalOrdersInMonth
 } from '@/data/OrderAPI';
 import { ClockIcon } from "@heroicons/react/24/solid";
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+
+// Register required components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 export function Home() {
   const [deliveredOrders, setDeliveredOrders] = useState(0);
   const [cancelledOrders, setCancelledOrders] = useState(0);
   const [userOrders, setUserOrders] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
+  const [monthlyOrders, setMonthlyOrders] = useState([]);
 
   useEffect(() => {
     const fetchStatistics = async () => {
@@ -40,13 +51,28 @@ export function Home() {
         setDeliveredOrders(delivered.totalDeliveredOrders || 0);
         setCancelledOrders(cancelled.totalCancelledOrders || 0);
         setUserOrders(userOrders.totalUserOrders || 0);
-        setTotalPrice(price.totalPriceOfAllOrders  || 0);
+        setTotalPrice(price.totalPriceOfAllOrders || 0);
       } catch (error) {
         console.error('Error fetching statistics:', error);
       }
     };
 
+    const fetchMonthlyOrders = async () => {
+      try {
+        const year = 2024;
+        const promises = [];
+        for (let month = 1; month <= 12; month++) {
+          promises.push(getTotalOrdersInMonth(year, month));
+        }
+        const results = await Promise.all(promises);
+        setMonthlyOrders(results.map(result => result.totalOrdersInMonth));
+      } catch (error) {
+        console.error('Error fetching monthly orders:', error);
+      }
+    };
+
     fetchStatistics();
+    fetchMonthlyOrders();
   }, []);
 
   const statisticsCardsData = [
@@ -96,6 +122,22 @@ export function Home() {
     },
   ];
 
+  const chartData = {
+    labels: [
+      'January', 'February', 'March', 'April', 'May', 'June', 
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ],
+    datasets: [
+      {
+        label: 'Total Orders',
+        data: monthlyOrders,
+        fill: false,
+        borderColor: 'rgba(75,192,192,1)',
+        backgroundColor: 'rgba(75,192,192,0.4)',
+      },
+    ],
+  };
+
   return (
     <div className="mt-12">
       <div className="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
@@ -116,22 +158,11 @@ export function Home() {
           />
         ))}
       </div>
-      <div className="mb-6 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-2 xl:grid-cols-3">
-        {statisticsChartsData.map((props) => (
-          <StatisticsChart
-            key={props.title}
-            {...props}
-            footer={
-              <Typography
-                variant="small"
-                className="flex items-center font-normal text-blue-gray-600"
-              >
-                <ClockIcon strokeWidth={2} className="h-4 w-4 text-blue-gray-400" />
-                &nbsp;{props.footer}
-              </Typography>
-            }
-          />
-        ))}
+      <div className="mb-6">
+        <Typography variant="h6" color="blue-gray">
+          Total Orders in 2024
+        </Typography>
+        <Line data={chartData} />
       </div>
     </div>
   );
