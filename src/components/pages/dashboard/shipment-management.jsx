@@ -36,16 +36,6 @@ function ShipmentManagement() {
     }
   };
 
-  const handleCheckboxChange = (orderId) => {
-    setSelectedOrders((prevSelected) => {
-      if (prevSelected.includes(orderId)) {
-        return prevSelected.filter((id) => id !== orderId);
-      } else {
-        return [...prevSelected, orderId];
-      }
-    });
-  };
-
   const handleShipperChange = (orderId, e) => {
     const value = e.target.value;
     setShipperAssignments(prevState => ({
@@ -54,44 +44,67 @@ function ShipmentManagement() {
     }));
   };
 
-  const handleCancel = (orderId) => {
-    setShipperAssignments(prevState => ({
-      ...prevState,
-      [orderId]: { ...prevState[orderId], selectedShipper: '', shipperAssigned: false }
-    }));
-  };
-
   const handleSubmit = async (orderId, e) => {
     e.preventDefault();
-  
+
     try {
       const { selectedShipper } = shipperAssignments[orderId];
       const order = orders.find((order) => order._id === orderId);
+
+      if (!order || !order.order) {
+        console.error('Invalid structure for order items:', order);
+        return;
+      }
       let itemIds = [];
-  
-      if (order && order.order && Array.isArray(order.order)) {
-        itemIds = order.order.map((item) => item._id);
-      } else if (order && order.order && order.order._id) {
+      if (order.order && Array.isArray(order.order)) {
+        itemIds = order.order.map(item => item._id);
+      } else if (order.order && order.order._id) {
         itemIds = [order.order._id];
       } else {
         console.error('Invalid structure for order items:', order.order);
         return;
       }
-  
-      await assignShipperToOrder(orderId, selectedShipper, itemIds);
+      let orderIds = [];
+      if (Array.isArray(order.order)) {
+        orderIds = order.order.map(o => o._id);
+      } else if (order._id) {
+        orderIds = [order._id];
+      } else {
+        console.error('Invalid structure for order:', order);
+        return;
+      }
+
+      const requestBody = {
+        orderIds,
+        shipperId: selectedShipper,
+        itemIds,
+      };
+      console.log('Request Body:', requestBody);
+      const token = localStorage.getItem('token')
+      // Log headers if any
+      const headers = {
+        'Content-Type': 'application/json',
+        // Add Authorization header if required
+        'Authorization': 'Bearer ' + token // Replace `token` with your actual token
+      };
+      console.log('Headers:', headers);
+
+      await assignShipperToOrder(requestBody, headers);
       console.log(`Shipper assigned successfully to order ${orderId}!`);
-  
+
       // Refresh orders after assignment
       const updatedOrders = await getOrdersByDate(selectedDate);
       setOrders(updatedOrders);
-  
+
       alert('Shipper assigned successfully!');
+      setSelectedOrders([]); // Clear selected orders
     } catch (error) {
-      console.error('Failed to assign shippers:', error);
-      alert('Error assigning shippers. Please try again.');
+      console.error('Failed to assign shipper:', error);
+      alert('Error assigning shipper. Please try again.');
     }
   };
-  
+
+
   useEffect(() => {
     const fetchShippers = async () => {
       try {
@@ -143,6 +156,14 @@ function ShipmentManagement() {
     setIsModalOpen(false);
   };
 
+  const handleOrderSelect = (orderId) => {
+    setSelectedOrders(prevState =>
+      prevState.includes(orderId)
+        ? prevState.filter(id => id !== orderId)
+        : [...prevState, orderId]
+    );
+  };
+
   return (
     <div>
       <Modal isOpen={isModalOpen} onClose={closeEditModal}>
@@ -163,12 +184,12 @@ function ShipmentManagement() {
           onChange={handleDateChange}
         />
       </div>
-      <div className="mt-12 mb-8 flex flex-col gap-12">
+      <div className="mt-12 mb-8 flex flex-col gap-12 ">
         <button
           onClick={() => openEditModal(selectedDate)}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-1/2 translate-x-1/2 "
         >
-          Open Edit Modal
+          Assign Shipper to Multiple Shipments
         </button>
 
         <Card>
@@ -181,7 +202,6 @@ function ShipmentManagement() {
             <table className="w-full min-w-[640px] table-auto">
               <thead>
                 <tr>
-
                   {["Number", "Paying Status", "Total Price", "Status", "Address", "Shipper", "Customer", "Actions"].map((el) => (
                     <th
                       key={el}
@@ -204,7 +224,7 @@ function ShipmentManagement() {
                   const shipperName = getShipperNameById(order.order.shipper);
 
                   return (
-                    <tr key={order._id}> 
+                    <tr key={order._id}>
                       <td className={className}>
                         <Typography className="text-xs font-semibold text-blue-gray-600">
                           {key + 1}

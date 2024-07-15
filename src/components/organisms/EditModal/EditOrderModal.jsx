@@ -6,7 +6,6 @@ import { getAllShippers } from '@/data/ShipperAPI';
 function EditOrderModal({ date, onClose }) {
     const [orders, setOrders] = useState([]);
     const [shippers, setShippers] = useState([]);
-    const [shipperAssignments, setShipperAssignments] = useState({});
     const [selectedOrders, setSelectedOrders] = useState([]);
     const [selectedShipper, setSelectedShipper] = useState('');
 
@@ -15,19 +14,11 @@ function EditOrderModal({ date, onClose }) {
             try {
                 const dateStr = date.split('T')[0];
                 const ordersData = await getOrdersByDate(dateStr);
-                const initialAssignments = {};
-                ordersData.forEach(order => {
-                    initialAssignments[order._id] = {
-                        selectedShipper: order.order.shipper || '',
-                        shipperAssigned: !!order.order.shipper
-                    };
-                });
 
                 // Filter orders where shipper is null
                 const filteredOrders = ordersData.filter(order => !order.order.shipper);
 
                 setOrders(filteredOrders);
-                setShipperAssignments(initialAssignments);
             } catch (error) {
                 console.error('Failed to fetch data:', error);
             }
@@ -62,42 +53,61 @@ function EditOrderModal({ date, onClose }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
-        if (selectedOrders.length === 0 || !selectedShipper) {
-            alert('Please select orders and a shipper to assign.');
-            return;
-        }
-    
+
         try {
-            const promises = selectedOrders.map(async (orderId) => {
-                const { selectedShipper } = shipperAssignments[orderId];
+            const orderIds = [];
+            const itemIds = [];
+
+            selectedOrders.forEach(orderId => {
                 const order = orders.find(order => order._id === orderId);
-                let itemIds = [];
-    
-                if (order && order.order && Array.isArray(order.order)) {
-                    itemIds = order.order.map(item => item._id); // Collect all itemIds
-                } else if (order && order.order && order.order._id) {
-                    itemIds = [order.order._id];
-                } else {
-                    console.error('Invalid structure for order items:', order.order);
+                if (!order || !order.order) {
+                    console.error('Invalid structure for order items:', order);
                     return;
                 }
-    
-                await assignShipperToOrder(orderId, selectedShipper, itemIds);
-                console.log(`Shipper assigned successfully to order ${orderId}!`);
-                return orderId;
+
+                if (Array.isArray(order.order)) {
+                    itemIds.push(...order.order.map(item => item._id));
+                } else if (order.order._id) {
+                    itemIds.push(order.order._id);
+                } else {
+                    console.error('Invalid structure for order items:', order.order);
+                }
+
+                orderIds.push(order._id);
             });
-    
-            await Promise.all(promises);
-            alert('Shippers assigned successfully!');
-            setSelectedOrders([]);
-            onClose(); // Close modal after successful assignment
+
+            if (orderIds.length === 0 || itemIds.length === 0) {
+                console.error('No valid orders or items found.');
+                return;
+            }
+
+            const requestBody = {
+                orderIds,
+                shipperId: selectedShipper,
+                itemIds
+            };
+
+            const token = localStorage.getItem('token');
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            };
+
+            await assignShipperToOrder(requestBody, headers);
+
+            console.log('Shipper assigned successfully!');
+            onClose();
+            // Refresh orders after assignment
+            const updatedOrders = await getOrdersByDate(date.split('T')[0]);
+            setOrders(updatedOrders);
+
+            alert('Shipper assigned successfully!');
+            setSelectedOrders([]); // Clear selected orders
         } catch (error) {
-            console.error('Failed to assign shippers:', error);
-            alert('Error assigning shippers. Please try again.');
+            console.error('Failed to assign shipper:', error);
+            alert('Error assigning shipper. Please try again.');
         }
     };
-    
 
     return (
         <div className="border-b border-gray-900/10 pb-12">
@@ -133,7 +143,7 @@ function EditOrderModal({ date, onClose }) {
                                             </td>
                                         </tr>
                                     ) : (
-                                        orders.map((order, index) => (
+                                        orders.map((order) => (
                                             <tr key={order._id}>
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <input
