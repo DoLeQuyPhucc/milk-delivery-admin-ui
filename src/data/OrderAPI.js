@@ -62,7 +62,6 @@ export const getOrdersByDate = async (date) => {
   }
 };
 
-
   // OrderAPI.js
 export const assignShipperToOrder = async (requestBody, headers) => {
     const response = await fetch('https://milk-delivery-api.onrender.com/api/orders/assignShipper', {
@@ -126,6 +125,7 @@ export async function getTotalOrdersInMonth(year, month){
         throw error;
     }
 }
+
 export async function getTotalUserOrders(){
     const url = 'https://milk-delivery-api.onrender.com/api/orders/getOrder/total-user-orders';
     const token = localStorage.getItem('token');

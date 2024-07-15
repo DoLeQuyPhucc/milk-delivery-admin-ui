@@ -1,33 +1,101 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Typography,
-  Card,
-  CardHeader,
-  CardBody,
-  IconButton,
-  Menu,
-  MenuHandler,
-  MenuList,
-  MenuItem,
-  Avatar,
-  Tooltip,
-  Progress,
 } from "@material-tailwind/react";
 import {
-  EllipsisVerticalIcon,
-  ArrowUpIcon,
-} from "@heroicons/react/24/outline";
+  BanknotesIcon,
+  UserPlusIcon,
+  UsersIcon,
+  ChartBarIcon,
+} from "@heroicons/react/24/solid";
 import { StatisticsCard } from "@/components/atoms/cards";
 import { StatisticsChart } from "@/components/atoms/charts";
 import {
-  statisticsCardsData,
   statisticsChartsData,
-  projectsTableData,
-  ordersOverviewData,
 } from "@/data";
-import { CheckCircleIcon, ClockIcon } from "@heroicons/react/24/solid";
+import {
+  getTotalDeliveredOrders,
+  getTotalCancelledOrders,
+  getTotalUserOrders,
+  getTotalPriceOfAllOrders
+} from '@/data/OrderAPI';
+import { ClockIcon } from "@heroicons/react/24/solid";
 
 export function Home() {
+  const [deliveredOrders, setDeliveredOrders] = useState(0);
+  const [cancelledOrders, setCancelledOrders] = useState(0);
+  const [userOrders, setUserOrders] = useState(0);
+  const [totalPrice, setTotalPrice] = useState(0);
+
+  useEffect(() => {
+    const fetchStatistics = async () => {
+      try {
+        const [delivered, cancelled, userOrders, price] = await Promise.all([
+          getTotalDeliveredOrders(),
+          getTotalCancelledOrders(),
+          getTotalUserOrders(),
+          getTotalPriceOfAllOrders()
+        ]);
+
+        setDeliveredOrders(delivered.totalDeliveredOrders || 0);
+        setCancelledOrders(cancelled.totalCancelledOrders || 0);
+        setUserOrders(userOrders.totalUserOrders || 0);
+        setTotalPrice(price.totalPriceOfAllOrders  || 0);
+      } catch (error) {
+        console.error('Error fetching statistics:', error);
+      }
+    };
+
+    fetchStatistics();
+  }, []);
+
+  const statisticsCardsData = [
+    {
+      color: "gray",
+      icon: BanknotesIcon,
+      title: "Total Delivered Orders",
+      value: deliveredOrders,
+      footer: {
+        color: "text-green-500",
+        value: "+55%",
+        label: "than last week",
+      },
+    },
+    {
+      color: "gray",
+      icon: UsersIcon,
+      title: "Total Cancelled Orders",
+      value: cancelledOrders,
+      footer: {
+        color: "text-green-500",
+        value: "+3%",
+        label: "than last month",
+      },
+    },
+    {
+      color: "gray",
+      icon: UserPlusIcon,
+      title: "Total User Orders",
+      value: userOrders,
+      footer: {
+        color: "text-red-500",
+        value: "-2%",
+        label: "than yesterday",
+      },
+    },
+    {
+      color: "gray",
+      icon: ChartBarIcon,
+      title: "Total Price of All Orders",
+      value: `${totalPrice} VND`,
+      footer: {
+        color: "text-green-500",
+        value: "+5%",
+        label: "than yesterday",
+      },
+    },
+  ];
+
   return (
     <div className="mt-12">
       <div className="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">

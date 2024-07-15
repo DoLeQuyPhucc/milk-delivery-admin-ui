@@ -19,7 +19,7 @@ import PackageManagement from "./components/pages/dashboard/package-managment";
 import BrandManagement from "./components/pages/dashboard/brand-management";
 import StoreManagement from "./components/pages/dashboard/store-management";
 import UserManagement from "./components/pages/dashboard/user-management";
-import { CalendarFilled } from "@ant-design/icons";
+import { CalendarFilled, TagFilled } from "@ant-design/icons";
 import OrderCalendar from "./components/pages/dashboard/shipment-management";
 import OrderManagement from "./components/pages/dashboard/order-management";
 import ShipmentManagment from "./components/pages/dashboard/shipment-management";
@@ -77,13 +77,13 @@ export const routes = [
         element: <StoreManagement/>
       },
       {
-        icon: <ShoppingCartIcon {...icon} />,
+        icon: <TagFilled {...icon} />,
         name: "brand",
         path: "/brand",
         element: <BrandManagement />,
       },
       {
-        icon: <CalendarFilled {...icon}/>,
+        icon: <ShoppingCartIcon {...icon}/>,
         name: "shipment",
         path: "/shipment",
         element: <ShipmentManagment/>,

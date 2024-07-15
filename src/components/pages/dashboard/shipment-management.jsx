@@ -2,21 +2,21 @@ import React, { useEffect, useState } from 'react';
 import { getOrdersByDate, assignShipperToOrder } from '@/data/OrderAPI';
 import { getAllShippers } from '@/data/ShipperAPI';
 import { Card, CardHeader, CardBody, Typography, Chip } from '@material-tailwind/react';
-import Modal from '@/components/organisms/Modal'; // Import your Modal component
+import Modal from '@/components/organisms/Modal'; 
 import EditOrderModal from '@/components/organisms/EditModal/EditOrderModal';
 import './calendar.css';
 
 function ShipmentManagement() {
-  const [selectedDate, setSelectedDate] = useState('');
+  const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+  const [selectedDate, setSelectedDate] = useState(today);
   const [orders, setOrders] = useState([]);
   const [shippers, setShippers] = useState([]);
   const [selectedOrders, setSelectedOrders] = useState([]);
   const [shipperAssignments, setShipperAssignments] = useState({});
-  const [isModalOpen, setIsModalOpen] = useState(false); // State for general modal control
-  const [editModalDate, setEditModalDate] = useState(''); // State to pass date to modal
+  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const [editModalDate, setEditModalDate] = useState(''); 
 
-  const handleDateChange = async (event) => {
-    const date = event.target.value;
+  const handleDateChange = async (date) => {
     setSelectedDate(date);
 
     try {
@@ -104,7 +104,6 @@ function ShipmentManagement() {
     }
   };
 
-
   useEffect(() => {
     const fetchShippers = async () => {
       try {
@@ -116,6 +115,7 @@ function ShipmentManagement() {
     };
 
     fetchShippers();
+    handleDateChange(today); // Fetch orders for today's date on initial render
   }, []);
 
   const getStatusColor = (status) => {
@@ -174,14 +174,13 @@ function ShipmentManagement() {
           />
         )}
       </Modal>
-
       <div className="date-picker">
         <label htmlFor="order-date">Select Date: </label>
         <input
           type="date"
           id="order-date"
           value={selectedDate}
-          onChange={handleDateChange}
+          onChange={(e) => handleDateChange(e.target.value)}
         />
       </div>
       <div className="mt-12 mb-8 flex flex-col gap-12 ">
