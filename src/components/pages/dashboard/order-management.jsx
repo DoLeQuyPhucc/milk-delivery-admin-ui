@@ -10,10 +10,12 @@ import {
 } from "@material-tailwind/react";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { getAllOrders } from "@/data/OrderAPI";
+import { format } from 'date-fns';
 
 function OrderManagement() {
+  
   const [orders, setOrders] = useState([]);
-
+  
   useEffect(() => {
     const fetchOrders = async () => {
       try {
@@ -39,6 +41,7 @@ function OrderManagement() {
       alert('Error canceling order. Please try again.');
     }
   };
+  
 
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
@@ -52,7 +55,7 @@ function OrderManagement() {
           <table className="w-full min-w-[640px] table-auto">
             <thead>
               <tr>
-                {["ID", "Total Amount", "Total Price", "Status", "Payment Method", "Shipper", "User", "Delivered At", "Action"].map((el) => (
+                {["ID", "Total Amount", "Total Price", "Status", "Payment Method", "Shipper", "User", "Delivered At"].map((el) => (
                   <th
                     key={el}
                     className="border-b border-blue-gray-50 py-3 px-5 text-left"
@@ -71,7 +74,7 @@ function OrderManagement() {
               {orders.map((order, key) => {
                 const className = `py-3 px-5 ${key === orders.length - 1 ? "" : "border-b border-blue-gray-50"
                   }`;
-
+                  const formattedDate = new Date(order.createdAt).toISOString().split('T')[0];
                 return (
                   <tr key={order._id}>
                     <td className={className}>
@@ -81,12 +84,12 @@ function OrderManagement() {
                     </td>
                     <td className={className}>
                       <Typography className="text-xs font-semibold text-blue-gray-600">
-                        {order.package.totalAmount}
+                        {order.package.numberOfShipment}
                       </Typography>
                     </td>
                     <td className={className}>
                       <Typography className="text-xs font-semibold text-blue-gray-600">
-                        {order.package.totalPrice}
+                        {order.package.totalPriceDiscount}
                       </Typography>
                     </td>
                     <td className={className}>
@@ -105,7 +108,7 @@ function OrderManagement() {
                     <td className={className}>
                       <div className="flex items-center">
                         <Typography className="text-xs font-semibold text-blue-gray-600 ml-2">
-                          {order.shipper}
+                        {formattedDate}
                         </Typography>
                       </div>
                     </td>

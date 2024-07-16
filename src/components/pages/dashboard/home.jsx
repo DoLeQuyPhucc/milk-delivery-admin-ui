@@ -137,6 +137,18 @@ export function Home() {
       },
     ],
   };
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      title: {
+        display: true,
+        text: 'Monthly Orders for 2024',
+      },
+    },
+  };
 
   return (
     <div className="mt-12">
@@ -162,7 +174,7 @@ export function Home() {
         <Typography variant="h6" color="blue-gray">
           Total Orders in 2024
         </Typography>
-        <Line data={chartData} />
+        <Line data={chartData} options={chartOptions} />
       </div>
     </div>
   );

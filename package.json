@@ -23,6 +23,7 @@
     "apexcharts": "3.44.0",
     "axios": "^1.7.2",
     "cors": "^2.8.5",
+    "date-fns": "^3.6.0",
     "jquery": "^3.7.1",
     "mongodb": "^6.7.0",
     "prop-types": "15.8.1",
